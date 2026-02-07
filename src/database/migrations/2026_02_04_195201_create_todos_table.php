@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('todos', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('content');
             $table->boolean('is_completed')->default(false);
             $table->string('tips')->nullable();
