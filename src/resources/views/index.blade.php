@@ -28,7 +28,8 @@
 
     <!-- 未完了のTodoを表示 -->
     <div class="todo-list">
-        <h3 id="incomplete">Todo</h3>
+        <section id="incomplete" class="todo-section">
+        <h3>Todo</h3>
         <ul>
         @if (Auth::check())
             @foreach ($todos as $todo)
@@ -75,9 +76,11 @@
             </li>
         @endif
         </ul>
+        </section>
 
     <!-- 完了したTodoを表示 -->
-        <h3 id="completed">完了したTodo</h3>
+        <section id="completed" class="todo-section">
+        <h3>完了したTodo</h3>
         @if (Auth::check())
         <ul>
             @foreach ($todos as $todo)
@@ -95,6 +98,7 @@
         @else
             <p>ログインすると、完了したTodoが表示されます。</p>
         @endif
+        </section>
     </div>
 
 @endsection

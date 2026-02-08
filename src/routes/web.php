@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminLoginController;
+use App\Http\Controllers\AdminTodoController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 
@@ -13,6 +16,8 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::get('/admins/login', [AdminLoginController::class, 'showLoginForm'])->name('admins.login');
+
+Route::post('/admins/login', [AdminLoginController::class, 'login'])->name('admins.login.post');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -33,14 +38,14 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // 管理者ページ
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth:admin'])->group(function () {
 
-    Route::get('/admin', function () {
-    return view('admin.member');
-    });
+    Route::get('/admin', [AdminTodoController::class, 'showUsers'])->name('admins.member');
 
-    Route::get('/admins.users.view/{id}', function ($id) {
-        return view('admins.show_todo', ['id' => $id]);
-    });
+    Route::get('/admins/show/{id}', [AdminTodoController::class, 'index'])->name('admins.show');
+
+    Route::post('/admin/logout', [AdminLoginController::class, 'logout'])->name('admins.logout');
+
+    Route::get('/users.todos.createTips/{id}', [AdminTodoController::class, 'createTips'])->name('admins.todos.createTips');
 
 });

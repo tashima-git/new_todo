@@ -62,12 +62,6 @@ class TodoController extends Controller
             'is_completed' => true,
         ]);
 
-        // Tipsを追加（管理者のみ）
-        if ($admin) {
-            $todo->tips = 'これは管理者が追加したTipsです。';
-            $todo->save();
-        }
-
         // 更新したTodoを返す
         return redirect()->route('users.todos')->with('message', 'Todoが更新されました');
     }

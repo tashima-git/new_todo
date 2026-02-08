@@ -6,22 +6,27 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class RoleMiggleware
+class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, string $role)
     {
-        if (Auth::guard('admin')->check()) {
-            $request->merge(['role' => 'admins']);
-            $user = Auth::guard('admin')->user();
-        } else {
-            $request->merge(['role' => 'users']);
-            $user = Auth::guard('web')->user();
+        // 管理者ルート
+        if ($role === 'admins') {
+            if (!Auth::guard('admin')->check()) {
+                return redirect()->route('admins.login');
+            }
+            return $next($request);
         }
 
-        if ($user && $user->role !== $role) {
-            return redirect('/'); // ロールが一致しない場合はホームにリダイレクト
+        // ユーザールート
+        if ($role === 'users') {
+            if (!Auth::guard('web')->check()) {
+                return redirect()->route('login');
+            }
+            return $next($request);
         }
 
-        return $next($request);
+        // role指定ミス
+        abort(403);
     }
 }

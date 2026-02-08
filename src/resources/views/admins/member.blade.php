@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <h2>{{ $name->admins }}の管理リスト</h2>
+    <h2>{{ $admin->name }}の管理リスト</h2>
 
     <!-- ユーザーをリストで表示 -->
     <ul>
@@ -10,10 +10,11 @@
                 <div class="user-name">{{ $user->name }}</div>
 
                 <div class="button">
-                    <form action="{{ route('admins.users.view', ['id' => $user->id]) }}" method="GET">
-                        @csrf
+                    <form action="{{ route('admins.show', $user->id) }}" method="GET">
                         <button class="view-button" type="submit">詳細</button>
                     </form>
             </li>
         @endforeach
     </ul>
+
+@endsection

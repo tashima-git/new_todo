@@ -1,0 +1,26 @@
+h2 {
+    margin: 16px;
+    text-align: center;
+    color: #000000;
+    font-size: 32px;
+}
+
+.auth-container {
+    width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    font-size: 20px;
+}
+
+.auth-content {
+    margin-bottom: 16px;
+}
+
+.auth-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}

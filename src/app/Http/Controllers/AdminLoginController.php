@@ -23,7 +23,7 @@ class AdminLoginController extends Controller
         if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
             // 認証成功
-            return redirect()->intended('/admin.member');
+            return redirect()->route('admins.member');
         }
 
         // 認証失敗
@@ -37,6 +37,6 @@ class AdminLoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/auth/admins_login');
+        return redirect('/');
     }
 }
