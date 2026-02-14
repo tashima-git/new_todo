@@ -1,51 +1,77 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TodoController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\AdminLoginController;
-use App\Http\Controllers\AdminTodoController;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskKillController;
+use App\Http\Controllers\StatController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\HelpController;
 
-
-// ログイン・登録機能
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::get('/admins/login', [AdminLoginController::class, 'showLoginForm'])->name('admins.login');
-
-Route::post('/admins/login', [AdminLoginController::class, 'login'])->name('admins.login.post');
-
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-
-// トップページ
+// -------------------------------
+// TOP（ログイン必須にするなら auth を付ける）
+// -------------------------------
 Route::get('/', function () {
-    return view('index');
+    return redirect()->route('tasks.index');
 });
 
-// ユーザーページ
+// -------------------------------
+// Help (guest OK)
+// -------------------------------
+Route::get('/help', [HelpController::class, 'index'])->name('help.index');
+
+// -------------------------------
+// Auth required
+// -------------------------------
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', [TodoController::class, 'index'])->name('users.todos');
-    Route::get('/users.todos.create', [TodoController::class, 'create'])->name('users.todos.create');
-    Route::put('/users.todos.update/{id}', [TodoController::class, 'update'])->name('users.todos.update');
-    Route::delete('/users.todos.delete/{id}', [TodoController::class, 'delete'])->name('users.todos.delete');
-    Route::patch('/users.todos.completed/{id}', [TodoController::class, 'completed'])->name('users.todos.completed');
-});
 
-// 管理者ページ
-Route::middleware(['auth:admin'])->group(function () {
+    // -------------------------------
+    // Tasks
+    // -------------------------------
+    Route::prefix('tasks')->name('tasks.')->group(function () {
 
-    Route::get('/admin', [AdminTodoController::class, 'showUsers'])->name('admins.member');
+        Route::get('/', [TaskController::class, 'index'])->name('index');
 
-    Route::get('/admins/show/{id}', [AdminTodoController::class, 'index'])->name('admins.show');
+        Route::get('/create', [TaskController::class, 'create'])->name('create');
+        Route::post('/', [TaskController::class, 'store'])->name('store');
 
-    Route::post('/admin/logout', [AdminLoginController::class, 'logout'])->name('admins.logout');
+        Route::get('/{task}', [TaskController::class, 'show'])->name('show');
+        Route::get('/{task}/edit', [TaskController::class, 'edit'])->name('edit');
+        Route::put('/{task}', [TaskController::class, 'update'])->name('update');
 
-    Route::get('/users.todos.createTips/{id}', [AdminTodoController::class, 'createTips'])->name('admins.todos.createTips');
+        // 完了・未完了
+        Route::patch('/{task}/complete', [TaskController::class, 'complete'])->name('complete');
+        Route::patch('/{task}/uncomplete', [TaskController::class, 'uncomplete'])->name('uncomplete');
 
+        // 一括操作
+        Route::post('/bulk', [TaskController::class, 'bulk'])->name('bulk');
+
+        // 削除（pendingのみ許可）
+        Route::delete('/{task}', [TaskController::class, 'destroy'])->name('destroy');
+    });
+
+    // -------------------------------
+    // TaskKill
+    // -------------------------------
+    Route::get('/taskkill', [TaskKillController::class, 'index'])->name('taskkill.index');
+    Route::post('/taskkill/execute', [TaskKillController::class, 'execute'])->name('taskkill.execute');
+    Route::get('/taskkill/result', [TaskKillController::class, 'result'])->name('taskkill.result');
+
+    // -------------------------------
+    // Stats / Status
+    // -------------------------------
+    Route::get('/stats', [StatController::class, 'index'])->name('stats.index');
+    Route::get('/status', [StatusController::class, 'index'])->name('status.index');
+
+    // -------------------------------
+    // Achievements
+    // -------------------------------
+    Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
+
+    // -------------------------------
+    // Plan
+    // -------------------------------
+    Route::get('/plan', [PlanController::class, 'index'])->name('plan.index');
+    Route::post('/plan', [PlanController::class, 'update'])->name('plan.update');
 });

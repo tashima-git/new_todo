@@ -16,8 +16,14 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->unsignedBigInteger('plan_id');
+            $table->integer('total_patience')->default(0);
+            $table->integer('total_speed')->default(0);
+            $table->integer('total_focus')->default(0);
+            $table->integer('total_accuracy')->default(0);
+            $table->integer('total_life')->default(0);
+            $table->integer('total_strategy')->default(0);
+            $table->timestamps();
         });
     }
 
