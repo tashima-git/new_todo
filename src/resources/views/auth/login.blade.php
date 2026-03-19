@@ -13,12 +13,12 @@
 
         <div class="auth-content">
             <label for="email" class="auth-label">メールアドレス</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
+            <input id="email" class="input-field" type="email" name="email" value="{{ old('email') }}" required autofocus>
         </div>
 
         <div class="auth-content">
             <label for="password" class="auth-label">パスワード</label>
-            <input id="password" type="password" name="password" required>
+            <input id="password" class="input-field" type="password" name="password" required>
         </div>
 
         <div>
@@ -28,7 +28,7 @@
     </div>
 
     <div>
-        <a href="{{ route('register') }}">新規登録はこちら</a>
+        <a href="{{ route('register') }}" class="auth-link">新規登録はこちら</a>
     </div>
 
 @endsection

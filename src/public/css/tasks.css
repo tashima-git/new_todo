@@ -1,0 +1,348 @@
+/* ===============================
+   変数（テーマ）
+=============================== */
+
+:root {
+    --bg-main: #0f0f13;
+    --bg-panel: #141418;
+    --bg-sub: #16161a;
+    --bg-button: #1a1a1f;
+
+    --border-main: #2a2a2f;
+    --border-sub: #26262c;
+
+    --text-main: #fff;
+    --text-sub: #aaa;
+    --text-muted: #888;
+}
+
+/* ===============================
+   基本
+=============================== */
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+/* ===============================
+   レイアウト
+=============================== */
+
+.tasks-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.tasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.tasks-title h1 {
+    font-size: 30px;
+    margin: 0;
+    letter-spacing: 3px;
+}
+
+/* ===============================
+   共通ボタン
+=============================== */
+
+.btn,
+.task-actions a,
+.task-actions button,
+.btn-create,
+.btn-reset {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+
+    border: 2px solid var(--text-main);
+    border-radius: 6px;
+
+    background: var(--bg-button);
+    color: var(--text-main);
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+.btn:hover,
+.task-actions a:hover,
+.task-actions button:hover,
+.btn-create:hover,
+.btn-reset:hover,
+.pagination-wrapper a:hover {
+    opacity: 0.85;
+    background: linear-gradient(#686868, #242424);
+}
+
+/* ===============================
+   フィルタ
+=============================== */
+
+.tasks-filter {
+    border: 2px solid var(--border-main);
+    border-radius: 8px;
+    background: var(--bg-sub);
+
+    padding: 14px;
+    margin-bottom: 20px;
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+}
+
+.filter-item label {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #bdbdbd;
+}
+
+.filter-item select,
+.bulk-controls select {
+    background: #1c1c22;
+    color: var(--text-main);
+    border: 1px solid #333;
+    padding: 6px;
+}
+
+/* ===============================
+   タブ
+=============================== */
+
+.tasks-tabs,
+.view-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-main);
+}
+
+.tasks-tabs {
+    margin-bottom: 20px;
+}
+
+.view-tabs {
+    margin-top: 16px;
+}
+
+.tab,
+.view-tab {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    transition: 0.15s;
+}
+
+.tab:hover,
+.view-tab:hover {
+    opacity: 0.8;
+}
+
+.tab.active,
+.view-tab.active {
+    color: var(--text-main);
+    font-weight: bold;
+    border-bottom: 3px solid var(--text-main);
+}
+
+/* ===============================
+   テーブル
+=============================== */
+
+.tasks-table-wrapper {
+    border: 2px solid var(--border-main);
+    border-radius: 8px;
+    background: var(--bg-panel);
+
+    padding: 10px;
+    margin-bottom: 20px;
+
+    overflow-x: auto;
+}
+
+.tasks-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+}
+
+.tasks-table th {
+    background: #1c1c22;
+    color: var(--text-sub);
+    font-size: 11px;
+}
+
+.tasks-table th,
+.tasks-table td {
+    padding: 10px;
+    border: 1px solid var(--border-sub);
+}
+
+.tasks-table tr:hover {
+    opacity: 0.8;
+}
+
+/* 行タイプ */
+
+.task-row.boss {
+    border-left: 4px solid #ff4d4f;
+    background: #2a1111;
+}
+
+.task-row.mid {
+    border-left: 4px solid #f59e0b;
+    background: #2a2211;
+}
+
+.task-row.mob {
+    border-left: 4px solid #3b82f6;
+}
+
+/* ===============================
+   ツリー構造
+=============================== */
+
+.task-row.collapsed {
+    display: none;
+}
+
+.task-row td:nth-child(2) {
+    position: relative;
+}
+
+.level-0 td:nth-child(2) {
+    padding-left: 0;
+}
+
+.level-1 td:nth-child(2) {
+    padding-left: 20px;
+}
+
+.level-2 td:nth-child(2) {
+    padding-left: 40px;
+}
+
+.level-3 td:nth-child(2) {
+    padding-left: 60px;
+}
+
+.level-4 td:nth-child(2) {
+    padding-left: 80px;
+}
+
+/* トグル */
+.toggle-children {
+    width: 20px;
+    height: 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 4px;
+
+    border: 1px solid var(--text-main);
+    background: none;
+    cursor: pointer;
+}
+
+/* ===============================
+   操作ボタン
+=============================== */
+
+.task-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* ===============================
+   緊急タスク
+=============================== */
+
+.urgent-row {
+    background: #2b1212;
+    border-left: 4px solid #ff4d4f;
+}
+
+.urgent-row td {
+    font-weight: bold;
+}
+
+/* ===============================
+   一括操作
+=============================== */
+
+.bulk-actions-wrapper {
+    margin-bottom: 12px;
+}
+
+.bulk-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#bulkSubmit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ===============================
+   ページネーション
+=============================== */
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 20px;
+}
+
+.pagination-wrapper a,
+.pagination-wrapper span {
+    min-width: 32px;
+    padding: 6px 10px;
+    text-align: center;
+    font-size: 12px;
+
+    border-radius: 6px;
+    border: 2px solid var(--text-main);
+
+    background: var(--bg-button);
+    color: var(--text-main);
+
+    transition: 0.15s;
+}
+
+.pagination-wrapper a {
+    opacity: 0.3;
+    text-decoration: none;
+}
+
+.pagination-wrapper a:active {
+    transform: translateY(1px);
+}
+
+.pagination-wrapper span {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.pagination-wrapper span:first-child,
+.pagination-wrapper span:last-child {
+    display: none;
+}

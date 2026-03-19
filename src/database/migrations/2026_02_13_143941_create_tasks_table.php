@@ -31,6 +31,10 @@ return new class extends Migration
             // 緊急（急ぎ）
             $table->boolean('is_urgent')->default(false);
 
+            // ボスタイプ（作成時に確定）
+            // mob = 雑魚 / mid = 中ボス / boss = 大ボス
+            $table->enum('boss_type', ['mob', 'mid', 'boss'])->default('mob');
+
             // 状態
             $table->enum('status', ['pending', 'stocked', 'killed'])->default('pending');
 
@@ -57,6 +61,9 @@ return new class extends Migration
             $table->index(['user_id', 'status']);
             $table->index(['user_id', 'due_date']);
             $table->index(['parent_task_id']);
+
+            // 追加：ボスタイプ検索も今後使う可能性が高い
+            $table->index(['user_id', 'boss_type']);
         });
     }
 

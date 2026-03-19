@@ -117,7 +117,6 @@
                 </div>
 
                 <div class="flex justify-between text-xs text-gray-500">
-                    <span>0</span>
                     <span>{{ number_format($max) }}</span>
                 </div>
             </div>

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->unsignedBigInteger('plan_id');
+            $table->unsignedBigInteger('plan_id')->default(1)->constrained();
             $table->integer('total_patience')->default(0);
             $table->integer('total_speed')->default(0);
             $table->integer('total_focus')->default(0);

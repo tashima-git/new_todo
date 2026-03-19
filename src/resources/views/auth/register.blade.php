@@ -13,22 +13,22 @@
 
         <div class="auth-content">
             <label for="name" class="auth-label">名前</label>
-            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus>
+            <input id="name" class="input-field" type="text" name="name" value="{{ old('name') }}" required autofocus>
         </div>
 
         <div class="auth-content">
             <label for="email" class="auth-label">メールアドレス</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required>
+            <input id="email" class="input-field" type="email" name="email" value="{{ old('email') }}" required>
         </div>
 
         <div class="auth-content">
             <label for="password" class="auth-label">パスワード</label>
-            <input id="password" type="password" name="password" required>
+            <input id="password" class="input-field" type="password" name="password" required>
         </div>
 
         <div class="auth-content">
             <label for="password_confirmation" class="auth-label">パスワード確認</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" required>
+            <input id="password_confirmation" class="input-field" type="password" name="password_confirmation" required>
         </div>
 
         <div>
@@ -38,6 +38,6 @@
     </div>
 
     <div>
-        <a href="{{ route('login') }}">ログインはこちら</a>
+        <a href="{{ route('login') }}" class="auth-link">ログインはこちら</a>
     </div>
 @endsection

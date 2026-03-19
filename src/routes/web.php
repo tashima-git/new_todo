@@ -75,3 +75,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/plan', [PlanController::class, 'index'])->name('plan.index');
     Route::post('/plan', [PlanController::class, 'update'])->name('plan.update');
 });
+
+
+// 開発用タスク生成ボタン
+use App\Http\Controllers\DevToolController;
+Route::post('/dev/generate', [DevToolController::class, 'generateTasks']);

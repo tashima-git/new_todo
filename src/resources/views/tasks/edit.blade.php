@@ -61,6 +61,7 @@
                         id="due_date"
                         name="due_date"
                         type="date"
+                        min="{{ now()->toDateString() }}"
                         class="tk-input"
                         value="{{ old('due_date', optional($task->due_date)->format('Y-m-d')) }}"
                     >
