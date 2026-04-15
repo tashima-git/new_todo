@@ -10,6 +10,9 @@ export default function TaskKill({ tasks = [], executeUrl }) {
     const runningRef = useRef(false);
     const mountedRef = useRef(true);
 
+    // ★ SE
+    const slashAudioRef = useRef(null);
+
     const currentTask = tasks[index] ?? null;
 
     // =========================
@@ -54,6 +57,45 @@ export default function TaskKill({ tasks = [], executeUrl }) {
     };
 
     // =========================
+    // SE 初期化
+    // =========================
+    useEffect(() => {
+
+        slashAudioRef.current = new Audio("/sounds/slash.mp3");
+
+        // 音量調整
+        slashAudioRef.current.volume = 0.6;
+
+    }, []);
+
+    // =========================
+    // SE 再生
+    // =========================
+    const playSlash = () => {
+
+        const audio = slashAudioRef.current;
+
+        if (!audio) return;
+
+        audio.currentTime = 0;
+
+        // クリティカル判定
+        const isHeavy = Math.random() < 0.1;
+
+        if (isHeavy) {
+
+            audio.playbackRate = 0.9;
+
+        } else {
+
+            audio.playbackRate = 1.25 + Math.random() * 0.25;
+
+        }
+
+        audio.play().catch(() => {});
+    };
+
+    // =========================
     // 1タスク討伐
     // =========================
     const killOnce = async () => {
@@ -66,12 +108,20 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
         runningRef.current = true;
 
+        // 斬撃開始
         setIsCutting(true);
+
+        // ★ SE再生
+        playSlash();
+
+        // debug
+        console.log("cut start");
 
         const success = await executeKill(task);
 
         if (success) {
 
+            // エフェクトを見せる時間
             await new Promise(r => setTimeout(r, 250));
 
             const nextIndex = indexRef.current + 1;
@@ -80,6 +130,8 @@ export default function TaskKill({ tasks = [], executeUrl }) {
             setIndex(nextIndex);
 
             if (nextIndex >= tasks.length) {
+
+                await new Promise(r => setTimeout(r, 200));
 
                 window.location.href = "/taskkill/result";
                 return;
@@ -100,7 +152,8 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
             await killOnce();
 
-            await new Promise(r => setTimeout(r, 30));
+            // 次の斬撃までの間隔
+            await new Promise(r => setTimeout(r, 50));
         }
     };
 
@@ -130,8 +183,16 @@ export default function TaskKill({ tasks = [], executeUrl }) {
     useEffect(() => {
 
         return () => {
+
             mountedRef.current = false;
             holdingRef.current = false;
+
+            // ★ Audio解放
+            if (slashAudioRef.current) {
+
+                slashAudioRef.current.pause();
+                slashAudioRef.current = null;
+            }
         };
 
     }, []);
@@ -152,85 +213,55 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
         <div style={{ textAlign: "center" }}>
 
-            <div
-                className={`tk-kill-card ${isCutting ? "tk-cut" : ""}`}
-                style={{
-                    position: "relative",
-                    padding: "40px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    background: "#fff",
-                    userSelect: "none",
-                }}
-            >
+            <div className="tk-kill-card">
 
-                <div style={{ fontSize: "14px", opacity: 0.6 }}>
-                    #{currentTask.id}
+                {/* 上パーツ */}
+                <div className={`tk-card-layer top ${isCutting ? "cut" : ""}`}>
+
+                    <div className="tk-kill-id">
+                        #{currentTask.id}
+                    </div>
+
+                    <div className="tk-kill-title">
+                        {currentTask.title}
+                    </div>
+
                 </div>
 
-                <div style={{ fontSize: "20px", marginTop: "10px" }}>
-                    {currentTask.title}
+                {/* 下パーツ */}
+                <div className={`tk-card-layer bottom ${isCutting ? "cut" : ""}`}>
+
+                    <div className="tk-kill-id">
+                        #{currentTask.id}
+                    </div>
+
+                    <div className="tk-kill-title">
+                        {currentTask.title}
+                    </div>
+
                 </div>
 
-                {isCutting && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "-20%",
-                            width: "140%",
-                            height: "2px",
-                            background: "white",
-                            boxShadow: "0 0 12px white",
-                            transform: "rotate(-20deg)",
-                            animation: "slash 0.3s linear forwards",
-                        }}
-                    />
-                )}
+                {/* 斬撃エフェクト */}
+                {isCutting && <div className="tk-slash" />}
 
             </div>
 
+            {/* 討伐ボタン */}
             <button
+                className="tk-kill-btn"
                 onMouseDown={startRapid}
                 onMouseUp={stopRapid}
                 onMouseLeave={stopRapid}
                 onClick={() => {
-                    if (!holdingRef.current) killOnce();
-                }}
-                style={{
-                    marginTop: "24px",
-                    padding: "10px 24px",
-                    fontSize: "16px",
-                    cursor: "pointer",
+
+                    // クリック単発用
+                    if (!holdingRef.current) {
+                        killOnce();
+                    }
                 }}
             >
-                討伐する
+                討伐
             </button>
-
-            <style>{`
-                @keyframes slash {
-                    0% {
-                        transform: translateX(-100%) rotate(-20deg);
-                        opacity:1;
-                    }
-                    100% {
-                        transform: translateX(100%) rotate(-20deg);
-                        opacity:0;
-                    }
-                }
-
-                .tk-cut {
-                    animation: shake 0.3s ease;
-                }
-
-                @keyframes shake {
-                    0% { transform: translateX(0); }
-                    25% { transform: translateX(-4px); }
-                    50% { transform: translateX(4px); }
-                    75% { transform: translateX(-2px); }
-                    100% { transform: translateX(0); }
-                }
-            `}</style>
 
         </div>
     );

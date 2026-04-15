@@ -1,3 +1,21 @@
+/* ===============================
+   変数（テーマ）
+=============================== */
+
+:root {
+    --bg-main: #090909;
+    --bg-panel: #141418;
+    --bg-sub: #16161a;
+    --bg-button: #0f0f13;
+
+    --border-main: #2a2a2f;
+    --border-sub: #26262c;
+
+    --text-main: #fff;
+    --text-sub: #d1d1d1;
+    --text-muted: #888;
+}
+
 /* =========================
    Base
 ========================= */
@@ -5,8 +23,8 @@
 body {
     margin: 0;
     font-family: "DotGothic16", monospace;
-    background: radial-gradient(circle at center, #111 0%, #050505 100%);
-    color: #f0f0f0;
+    background: var(--bg-main);
+    color: #ffffff;
 }
 
 a {
@@ -24,8 +42,7 @@ a:hover {
 
 .tk-header {
     background: linear-gradient(#1a1a1a, #0b0b0b);
-    border-bottom: 1px solid #333;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+    border-bottom: 1px solid #777777;
 }
 
 .tk-header__inner {
@@ -76,17 +93,21 @@ a:hover {
 }
 
 .tk-nav__item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px var(--text-main);
 }
 
 .tk-nav__en {
-    font-size: 16px;
+    font-size: 17px;
     letter-spacing: 1px;
+    color: var(--text-main);
 }
 
 .tk-nav__ja {
-    font-size: 13px;
+    font-size: 14px;
     opacity: .6;
+    color: var(--text-sub);
 }
 
 /* =========================
@@ -159,21 +180,25 @@ a:hover {
 ========================= */
 
 button {
-    background: linear-gradient(#2c2c2c, #1b1b1b);
-    border: 1px solid #444;
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
 
-    color: #fff;
-
-    padding: 10px 18px;
+    border: 2px solid var(--text-main);
     border-radius: 6px;
 
+    background: var(--bg-button);
+    color: var(--text-main);
+
+    text-decoration: none;
     cursor: pointer;
 
-    transition: all .15s ease;
+    transition: 0.15s;
 }
 
 button:hover {
-    background: linear-gradient(#3a3a3a, #242424);
+    opacity: 0.85;
+    background: linear-gradient(#686868, #242424);
 }
 
 button:active {

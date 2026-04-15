@@ -2,151 +2,287 @@
 
 @section('title', 'ステータス')
 
-@section('content')
-@php
-    // Controllerから$userが来ていない場合でも動くように保険
-    $user = $user ?? auth()->user();
+@section('css')
+<link rel="stylesheet" href="/css/status.css">
+@endsection
 
-    $stats = [
-        'patience' => [
-            'label_ja' => '忍耐',
-            'label_en' => 'Patience',
-            'value' => $user->total_patience ?? 0,
-            'desc' => '継続力・我慢強さ',
-        ],
-        'speed' => [
-            'label_ja' => '素早さ',
-            'label_en' => 'Speed',
-            'value' => $user->total_speed ?? 0,
-            'desc' => '行動の速さ・着手力',
-        ],
-        'focus' => [
-            'label_ja' => '集中',
-            'label_en' => 'Focus',
-            'value' => $user->total_focus ?? 0,
-            'desc' => '一点突破・没頭力',
-        ],
-        'accuracy' => [
-            'label_ja' => '正確',
-            'label_en' => 'Accuracy',
-            'value' => $user->total_accuracy ?? 0,
-            'desc' => 'ミスの少なさ・丁寧さ',
-        ],
-        'life' => [
-            'label_ja' => '生命',
-            'label_en' => 'Life',
-            'value' => $user->total_life ?? 0,
-            'desc' => '体力・粘り強さ',
-        ],
-        'strategy' => [
-            'label_ja' => '戦略',
-            'label_en' => 'Strategy',
-            'value' => $user->total_strategy ?? 0,
-            'desc' => '計画性・工夫',
-        ],
+
+@section('content')
+
+@php
+
+$user = $user ?? auth()->user();
+
+$stats = [
+
+    'patience' => [
+        'label_ja' => '忍耐',
+        'value' => $user->total_patience ?? 0,
+    ],
+
+    'speed' => [
+        'label_ja' => '素早さ',
+        'value' => $user->total_speed ?? 0,
+    ],
+
+    'focus' => [
+        'label_ja' => '集中力',
+        'value' => $user->total_focus ?? 0,
+    ],
+
+    'accuracy' => [
+        'label_ja' => '正確さ',
+        'value' => $user->total_accuracy ?? 0,
+    ],
+
+    'life' => [
+        'label_ja' => '生活力',
+        'value' => $user->total_life ?? 0,
+    ],
+
+    'strategy' => [
+        'label_ja' => '戦略',
+        'value' => $user->total_strategy ?? 0,
+    ],
+
+];
+
+$total = collect($stats)->sum('value');
+
+$max = max(1, collect($stats)->max('value'));
+
+
+
+/* ===============================
+   レーダー計算
+=============================== */
+
+$centerX = 100;
+$centerY = 100;
+$radius = 70;
+
+$values = collect($stats)
+->map(fn($s)=> $s['value'] / $max)
+->values();
+
+
+/* 外枠 */
+$basePoints = [];
+
+for($i=0;$i<6;$i++){
+
+    $angle = deg2rad(60*$i - 90);
+
+    $x = $centerX + cos($angle)*$radius;
+    $y = $centerY + sin($angle)*$radius;
+
+    $basePoints[] = "$x,$y";
+}
+
+
+/* ステータス形状 */
+$valuePoints = [];
+
+for($i=0;$i<6;$i++){
+
+    $angle = deg2rad(60*$i - 90);
+
+    $r = $radius * $values[$i];
+
+    $x = $centerX + cos($angle)*$r;
+    $y = $centerY + sin($angle)*$r;
+
+    $valuePoints[] = "$x,$y";
+}
+
+
+/* ラベル */
+$labels = [];
+
+$i = 0;
+
+foreach($stats as $s){
+
+    $angle = deg2rad(60*$i - 90);
+
+    $labelRadius = $radius + 22;
+
+    $x = $centerX + cos($angle)*$labelRadius;
+    $y = $centerY + sin($angle)*$labelRadius;
+
+    $labels[] = [
+        'x'=>$x,
+        'y'=>$y,
+        'text'=>$s['label_ja']
     ];
 
-    $total = collect($stats)->sum('value');
-    $max = max(1, collect($stats)->max('value')); // 0割防止
+    $i++;
+}
+
 @endphp
 
-<div class="space-y-6">
 
-    {{-- タイトル --}}
-    <section class="space-y-1">
-        <h1 class="text-2xl font-bold">ステータス</h1>
-        <p class="text-sm text-gray-600">
-            討伐で得た成長が、ここに蓄積されます。
-        </p>
+
+<div class="status">
+
+
+    {{-- header --}}
+    <section class="status-header">
+
+        <h1>ステータス</h1>
+
     </section>
 
-    {{-- サマリー --}}
-    <section class="rounded border bg-white p-4 space-y-2">
-        <div class="flex items-center justify-between">
+
+
+    {{-- summary --}}
+    <section class="status-summary">
+
+        <div class="status-summary-row">
+
             <div>
-                <div class="text-sm text-gray-500">合計ステータス</div>
-                <div class="text-2xl font-bold">{{ number_format($total) }}</div>
+
+                <div class="status-label">
+                    合計ステータス
+                </div>
+
+                <div class="status-total">
+                    {{ number_format($total) }}
+                </div>
+
             </div>
 
-            <div class="text-right">
-                <div class="text-sm text-gray-500">現在の冒険者</div>
-                <div class="font-semibold">{{ $user->name ?? 'Player' }}</div>
+
+            <div>
+
+                <div class="status-label">
+                    冒険者
+                </div>
+
+                <div class="status-name">
+                    {{ $user->name ?? 'Player' }}
+                </div>
+
             </div>
+
         </div>
 
-        <div class="text-xs text-gray-500">
-            ※この数値は「討伐結果」で加算されます（タスク作成だけでは増えません）
-        </div>
     </section>
 
-    {{-- ステ一覧 --}}
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        @foreach ($stats as $key => $s)
+
+
+    {{-- radar --}}
+    <section class="status-radar">
+
+        <svg viewBox="0 0 200 200" class="radar">
+
+            <!-- 外枠 -->
+            <polygon
+                points="{{ implode(' ', $basePoints) }}"
+                class="radar-base"
+            />
+
+            <!-- 放射線 -->
+            @for($i=0;$i<6;$i++)
+
             @php
-                $value = $s['value'];
-                $rate = (int) floor(($value / $max) * 100);
+
+                $angle = deg2rad(60*$i - 90);
+
+                $x = $centerX + cos($angle)*$radius;
+                $y = $centerY + sin($angle)*$radius;
+
             @endphp
 
-            <div class="rounded border bg-white p-4 space-y-3">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="text-xs text-gray-500 tracking-wide">
-                            {{ $s['label_en'] }}
-                        </div>
-                        <div class="text-lg font-bold">
-                            {{ $s['label_ja'] }}
-                        </div>
-                        <div class="text-xs text-gray-500">
-                            {{ $s['desc'] }}
-                        </div>
-                    </div>
+            <line
+                x1="100"
+                y1="100"
+                x2="{{ $x }}"
+                y2="{{ $y }}"
+                class="radar-line"
+            />
 
-                    <div class="text-right">
-                        <div class="text-2xl font-bold">
-                            {{ number_format($value) }}
-                        </div>
-                        <div class="text-xs text-gray-500">
-                            累計
-                        </div>
-                    </div>
+            @endfor
+
+
+            <!-- ステータス -->
+            <polygon
+                points="{{ implode(' ', $valuePoints) }}"
+                class="radar-value"
+            />
+
+
+            <!-- ラベル -->
+            @foreach($labels as $label)
+
+            <text
+                x="{{ $label['x'] }}"
+                y="{{ $label['y'] }}"
+                class="radar-label"
+            >
+
+                {{ $label['text'] }}
+
+            </text>
+
+            @endforeach
+
+
+        </svg>
+
+    </section>
+
+
+
+    {{-- cards --}}
+    <section class="status-grid">
+
+        @foreach ($stats as $s)
+
+        <div class="status-card">
+
+
+            <div class="status-card-header">
+
+                <div class="status-ja">
+
+                    {{ $s['label_ja'] }}
+
                 </div>
 
-                {{-- ゲージ（CSSはTailwindの範囲だけ。色などを別CSSにしたいなら後で外せる） --}}
-                <div class="h-2 w-full rounded bg-gray-100 overflow-hidden">
-                    <div class="h-full bg-gray-800" style="width: {{ $rate }}%"></div>
+
+                <div class="status-value">
+
+                    {{ number_format($s['value']) }}
+
                 </div>
 
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span>{{ number_format($max) }}</span>
-                </div>
+
             </div>
-        @endforeach
-    </section>
 
-    {{-- 次の導線 --}}
-    <section class="rounded border bg-white p-4">
-        <div class="space-y-2">
-            <div class="font-bold">次にできること</div>
 
-            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
-                <li>
-                    <a href="{{ route('tasks.index') }}" class="underline">
-                        タスクを作って、完了して、討伐待ちに送る
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('taskkill.index') }}" class="underline">
-                        TaskKillでまとめて討伐して、ステータスを伸ばす
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('stats.index') }}" class="underline">
-                        討伐記録（戦歴）を振り返る
-                    </a>
-                </li>
-            </ul>
+
+            <div class="status-bar">
+
+                <div
+
+                    class="status-bar-fill"
+
+                    style="width: {{ (int)(($s['value']/$max)*100) }}%">
+
+                </div>
+
+            </div>
+
+
         </div>
+
+        @endforeach
+
     </section>
+
+
 
 </div>
+
 @endsection

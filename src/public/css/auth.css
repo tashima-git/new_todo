@@ -1,3 +1,4 @@
+
 h2 {
     margin: 16px;
     text-align: center;
@@ -38,6 +39,30 @@ h2 {
     margin: 20px auto 0;
     text-align: center;
     text-decoration: none;
-    border: 1px solid #fff;
+    color: var(--text-main);
+    border: 2px solid var(--text-main);
+    border-radius: 6px;
     padding: 10px;
+}
+
+.auth-button {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+
+    border: 2px solid var(--text-main);
+    border-radius: 6px;
+
+    background: var(--bg-button);
+    color: var(--text-main);
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+.auth-button:hover,
+.auth-link:hover {
+    opacity: 0.85;
+    background: linear-gradient(#686868, #242424);
 }

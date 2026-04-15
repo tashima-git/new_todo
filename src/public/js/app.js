@@ -2203,6 +2203,9 @@ function TaskKill(_ref) {
   var holdingRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
   var runningRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
   var mountedRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(true);
+
+  // ★ SE
+  var slashAudioRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var currentTask = (_tasks$index = tasks[index]) !== null && _tasks$index !== void 0 ? _tasks$index : null;
 
   // =========================
@@ -2266,6 +2269,34 @@ function TaskKill(_ref) {
   }();
 
   // =========================
+  // SE 初期化
+  // =========================
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    slashAudioRef.current = new Audio("/sounds/slash.mp3");
+
+    // 音量調整
+    slashAudioRef.current.volume = 0.6;
+  }, []);
+
+  // =========================
+  // SE 再生
+  // =========================
+  var playSlash = function playSlash() {
+    var audio = slashAudioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+
+    // クリティカル判定
+    var isHeavy = Math.random() < 0.1;
+    if (isHeavy) {
+      audio.playbackRate = 0.9;
+    } else {
+      audio.playbackRate = 1.25 + Math.random() * 0.25;
+    }
+    audio.play()["catch"](function () {});
+  };
+
+  // =========================
   // 1タスク討伐
   // =========================
   var killOnce = /*#__PURE__*/function () {
@@ -2288,13 +2319,21 @@ function TaskKill(_ref) {
             return _context2.a(2);
           case 2:
             runningRef.current = true;
+
+            // 斬撃開始
             setIsCutting(true);
+
+            // ★ SE再生
+            playSlash();
+
+            // debug
+            console.log("cut start");
             _context2.n = 3;
             return executeKill(task);
           case 3:
             success = _context2.v;
             if (!success) {
-              _context2.n = 5;
+              _context2.n = 6;
               break;
             }
             _context2.n = 4;
@@ -2306,15 +2345,20 @@ function TaskKill(_ref) {
             indexRef.current = nextIndex;
             setIndex(nextIndex);
             if (!(nextIndex >= tasks.length)) {
-              _context2.n = 5;
+              _context2.n = 6;
               break;
             }
+            _context2.n = 5;
+            return new Promise(function (r) {
+              return setTimeout(r, 200);
+            });
+          case 5:
             window.location.href = "/taskkill/result";
             return _context2.a(2);
-          case 5:
+          case 6:
             setIsCutting(false);
             runningRef.current = false;
-          case 6:
+          case 7:
             return _context2.a(2);
         }
       }, _callee2);
@@ -2341,7 +2385,7 @@ function TaskKill(_ref) {
           case 1:
             _context3.n = 2;
             return new Promise(function (r) {
-              return setTimeout(r, 30);
+              return setTimeout(r, 50);
             });
           case 2:
             _context3.n = 0;
@@ -2379,6 +2423,12 @@ function TaskKill(_ref) {
     return function () {
       mountedRef.current = false;
       holdingRef.current = false;
+
+      // ★ Audio解放
+      if (slashAudioRef.current) {
+        slashAudioRef.current.pause();
+        slashAudioRef.current = null;
+      }
     };
   }, []);
 
@@ -2399,56 +2449,40 @@ function TaskKill(_ref) {
       textAlign: "center"
     },
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "tk-kill-card ".concat(isCutting ? "tk-cut" : ""),
-      style: {
-        position: "relative",
-        padding: "40px",
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-        background: "#fff",
-        userSelect: "none"
-      },
+      className: "tk-kill-card",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        style: {
-          fontSize: "14px",
-          opacity: 0.6
-        },
-        children: ["#", currentTask.id]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-        style: {
-          fontSize: "20px",
-          marginTop: "10px"
-        },
-        children: currentTask.title
+        className: "tk-card-layer top ".concat(isCutting ? "cut" : ""),
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+          className: "tk-kill-id",
+          children: ["#", currentTask.id]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "tk-kill-title",
+          children: currentTask.title
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "tk-card-layer bottom ".concat(isCutting ? "cut" : ""),
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+          className: "tk-kill-id",
+          children: ["#", currentTask.id]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "tk-kill-title",
+          children: currentTask.title
+        })]
       }), isCutting && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-        style: {
-          position: "absolute",
-          top: "50%",
-          left: "-20%",
-          width: "140%",
-          height: "2px",
-          background: "white",
-          boxShadow: "0 0 12px white",
-          transform: "rotate(-20deg)",
-          animation: "slash 0.3s linear forwards"
-        }
+        className: "tk-slash"
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+      className: "tk-kill-btn",
       onMouseDown: startRapid,
       onMouseUp: stopRapid,
       onMouseLeave: stopRapid,
       onClick: function onClick() {
-        if (!holdingRef.current) killOnce();
+        // クリック単発用
+        if (!holdingRef.current) {
+          killOnce();
+        }
       },
-      style: {
-        marginTop: "24px",
-        padding: "10px 24px",
-        fontSize: "16px",
-        cursor: "pointer"
-      },
-      children: "\u8A0E\u4F10\u3059\u308B"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("style", {
-      children: "\n                @keyframes slash {\n                    0% {\n                        transform: translateX(-100%) rotate(-20deg);\n                        opacity:1;\n                    }\n                    100% {\n                        transform: translateX(100%) rotate(-20deg);\n                        opacity:0;\n                    }\n                }\n\n                .tk-cut {\n                    animation: shake 0.3s ease;\n                }\n\n                @keyframes shake {\n                    0% { transform: translateX(0); }\n                    25% { transform: translateX(-4px); }\n                    50% { transform: translateX(4px); }\n                    75% { transform: translateX(-2px); }\n                    100% { transform: translateX(0); }\n                }\n            "
+      children: "\u8A0E\u4F10"
     })]
   });
 }
