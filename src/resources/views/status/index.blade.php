@@ -207,8 +207,10 @@ foreach($stats as $s){
 
             <!-- ステータス -->
             <polygon
-                points="{{ implode(' ', $valuePoints) }}"
+                points="100,100 100,100 100,100 100,100 100,100 100,100"
+                data-points="{{ implode(' ', $valuePoints) }}"
                 class="radar-value"
+                id="radarValue"
             />
 
 
@@ -265,12 +267,9 @@ foreach($stats as $s){
             <div class="status-bar">
 
                 <div
-
                     class="status-bar-fill"
-
-                    style="width: {{ (int)(($s['value']/$max)*100) }}%">
-
-                </div>
+                    data-width="{{ (int)(($s['value']/$max)*100) }}"
+                ></div>
 
             </div>
 
@@ -284,5 +283,59 @@ foreach($stats as $s){
 
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const audio = new Audio("/sounds/status.mp3");
+    audio.volume = 0.3;
+
+    audio.play().catch(() => {
+    });
+
+    const el = document.getElementById("radarValue");
+    if (!el) return;
+
+    const finalPoints = el.dataset.points
+        .split(" ")
+        .map(p => p.split(",").map(Number));
+
+    const duration = 1000;
+    const start = performance.now();
+
+    function animate(now) {
+
+        const t = Math.min((now - start) / duration, 1);
+
+        // ease-out
+        const ease = 1 - Math.pow(1 - t, 3);
+
+        const points = finalPoints.map(([x, y]) => {
+            const cx = 100;
+            const cy = 100;
+
+            const nx = cx + (x - cx) * ease;
+            const ny = cy + (y - cy) * ease;
+
+            return `${nx},${ny}`;
+        });
+
+        el.setAttribute("points", points.join(" "));
+
+        if (t < 1) requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+
+
+    setTimeout(() => {
+        document.querySelectorAll('.status-bar-fill').forEach(el => {
+            const w = el.dataset.width;
+            el.style.width = w + '%';
+        });
+    }, 100);
+
+});
+</script>
 
 @endsection
