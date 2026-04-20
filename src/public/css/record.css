@@ -1,0 +1,98 @@
+.record {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* タイトル */
+.record-header h1 {
+    font-size: 30px;
+}
+
+.record-header p {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+/* サマリー */
+.record-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.record-card {
+    border: 1px solid #ccc;
+    padding: 16px;
+    background: var(--bg-panel);
+}
+
+.record-label {
+    font-size: 16px;
+}
+
+.record-value {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+/* テーブル */
+.record-table {
+    margin-top: 24px;
+    border: 1px solid #ccc;
+    background: var-(--bg-panel);
+}
+
+.record-table-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ccc;
+}
+
+.record-table-body {
+    padding: 16px;
+}
+
+.record-empty {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* テーブル本体 */
+.record-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.record-table th {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.7;
+}
+
+.record-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #525252;
+}
+
+.record-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ユーティリティ */
+.nowrap {
+    white-space: nowrap;
+}
+
+.right {
+    text-align: right;
+}
+
+.title {
+    min-width: 220px;
+}

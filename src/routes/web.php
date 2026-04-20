@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskKillController;
-use App\Http\Controllers\StatController;
+use App\Http\Controllers\RecordController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\PlanController;
@@ -61,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
     // -------------------------------
     // Stats / Status
     // -------------------------------
-    Route::get('/stats', [StatController::class, 'index'])->name('stats.index');
+    Route::get('/record', [RecordController::class, 'index'])->name('record.index');
     Route::get('/status', [StatusController::class, 'index'])->name('status.index');
 
     // -------------------------------

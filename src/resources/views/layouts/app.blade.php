@@ -40,7 +40,7 @@
                     <span class="tk-nav__ja">ステータス</span>
                 </a>
 
-                <a href="{{ route('stats.index') }}" class="tk-nav__item js-nav-sound">
+                <a href="{{ route('record.index') }}" class="tk-nav__item js-nav-sound">
                     <span class="tk-nav__en">Record</span>
                     <span class="tk-nav__ja">戦績</span>
                 </a>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TaskKillLog;
 
-class StatController extends Controller
+class RecordController extends Controller
 {
     /**
      * 戦歴（統計）画面
@@ -40,6 +40,6 @@ class StatController extends Controller
             ->limit(20)
             ->get();
 
-        return view('stats.index', compact('summary', 'recentLogs'));
+        return view('record.index', compact('summary', 'recentLogs'));
     }
 }
