@@ -1,0 +1,220 @@
+/* ===============================
+ページ全体
+=============================== */
+
+.tk-page {
+max-width: 760px;
+margin: 0 auto;
+padding: 20px;
+}
+
+/* ===============================
+ヘッダー
+=============================== */
+
+.tk-page__header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 16px;
+margin-bottom: 20px;
+}
+
+.tk-page__en {
+font-size: 12px;
+opacity: 0.6;
+letter-spacing: 2px;
+}
+
+.tk-page__title {
+font-size: 26px;
+letter-spacing: 2px;
+}
+
+/* ===============================
+カード
+=============================== */
+
+.tk-card {
+border: 2px solid var(--border-main);
+border-radius: 8px;
+background: var(--bg-sub);
+padding: 20px;
+}
+
+.tk-card--mb {
+margin-bottom: 16px;
+}
+
+/* ===============================
+フォーム
+=============================== */
+
+.tk-form {
+display: flex;
+flex-direction: column;
+gap: 18px;
+}
+
+.tk-form__group {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+
+.tk-label {
+font-size: 14px;
+font-weight: bold;
+}
+
+.tk-required {
+color: var(--text-main);
+}
+
+.tk-input,
+.tk-select {
+width: 100%;
+padding: 8px;
+
+```
+border: 1px solid #333;
+border-radius: 4px;
+
+background: #1c1c22;
+color: var(--text-main);
+
+font-size: 14px;
+```
+
+}
+
+.tk-input:focus,
+.tk-select:focus {
+outline: none;
+border-color: var(--text-main);
+}
+
+.tk-help {
+font-size: 12px;
+opacity: 0.6;
+}
+
+/* ===============================
+チェックボックス
+=============================== */
+
+.tk-check {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+/* ===============================
+レイアウト補助
+=============================== */
+
+.tk-row {
+display: flex;
+align-items: center;
+}
+
+.tk-row--gap {
+gap: 10px;
+}
+
+.tk-row--right {
+justify-content: flex-end;
+}
+
+.tk-row--start {
+align-items: flex-start;
+}
+
+.tk-grid {
+display: grid;
+gap: 14px;
+}
+
+.tk-grid--2 {
+grid-template-columns: repeat(2, 1fr);
+}
+
+/* ===============================
+テキスト補助
+=============================== */
+
+.tk-strong {
+font-weight: bold;
+}
+
+.tk-muted {
+opacity: 0.7;
+}
+
+.tk-text-sm {
+font-size: 14px;
+}
+
+.tk-text-xs {
+font-size: 12px;
+}
+
+.tk-mt-6 {
+margin-top: 6px;
+}
+
+/* ===============================
+セクション
+=============================== */
+
+.tk-section {
+margin-top: 10px;
+}
+
+.tk-section__title {
+margin-bottom: 10px;
+}
+
+.tk-section__en {
+font-size: 12px;
+opacity: 0.6;
+}
+
+.tk-section__ja {
+font-size: 16px;
+font-weight: bold;
+}
+
+/* ===============================
+区切り線
+=============================== */
+
+.tk-hr {
+border: none;
+border-top: 1px solid #333;
+margin: 20px 0;
+}
+
+/* ===============================
+レスポンシブ
+=============================== */
+
+@media (max-width: 640px) {
+
+```
+.tk-page {
+    padding: 16px;
+}
+
+.tk-grid--2 {
+    grid-template-columns: 1fr;
+}
+
+.tk-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+```
+
+}

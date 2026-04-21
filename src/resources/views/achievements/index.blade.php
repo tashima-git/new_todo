@@ -24,9 +24,10 @@
 
     {{-- タイトル --}}
     <section class="space-y-1">
-        <h1 class="text-2xl font-bold">実績</h1>
+        <h1 class="text-2xl font-bold">実績(未実装)</h1>
         <p class="text-sm text-gray-600">
-            達成した証がここに残ります。
+            達成した証がここに残ります。(予定)
+
         </p>
     </section>
 
@@ -161,31 +162,6 @@
                     @endforeach
                 </div>
             @endif
-        </div>
-    </section>
-
-    {{-- 導線 --}}
-    <section class="rounded border bg-white p-4">
-        <div class="space-y-2">
-            <div class="font-bold">実績を増やすには</div>
-
-            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
-                <li>
-                    <a href="{{ route('tasks.index') }}" class="underline">
-                        タスクを完了して討伐待ちに送る
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('taskkill.index') }}" class="underline">
-                        TaskKillで討伐して、戦歴を積む
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('status.index') }}" class="underline">
-                        ステータスを伸ばす
-                    </a>
-                </li>
-            </ul>
         </div>
     </section>
 
