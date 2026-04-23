@@ -16,7 +16,6 @@ $hasParent = !empty($parentTaskId);
 {{-- ヘッダー --}}
 <div class="tk-page__header">
     <div>
-        <div class="tk-page__en">Create</div>
         <h1 class="tk-page__title">
             タスク作成
             @if ($hasParent)
@@ -83,10 +82,10 @@ $hasParent = !empty($parentTaskId);
                 value="{{ old('title') }}"
                 required
                 maxlength="255"
-                placeholder="例：Laravelのタスク一覧を作る"
+                placeholder="例：資料作成、買い物、洗濯など"
             >
             <div class="tk-help">
-                ※ なるべく「動詞」で書くと達成しやすい
+                ※ なるべく「動詞」で書くと、やるべきことが明確になります
             </div>
         </div>
 
@@ -107,7 +106,7 @@ $hasParent = !empty($parentTaskId);
 
         {{-- 期限 --}}
         <div class="tk-form__group">
-            <label class="tk-label" for="due_date">期限（任意）</label>
+            <label class="tk-label" for="due_date">期限</label>
             <input
                 type="date"
                 id="due_date"
@@ -116,9 +115,6 @@ $hasParent = !empty($parentTaskId);
                 min="{{ now()->toDateString() }}"
                 value="{{ old('due_date') }}"
             >
-            <div class="tk-help">
-                ※ 完了しても TaskKill するまでは残ります
-            </div>
         </div>
 
         {{-- 重要度 --}}

@@ -57,7 +57,6 @@ gap: 18px;
 }
 
 .tk-form__group {
-display: flex;
 flex-direction: column;
 gap: 6px;
 }
@@ -68,24 +67,18 @@ font-weight: bold;
 }
 
 .tk-required {
-color: var(--text-main);
+color: #a34e45;
 }
 
 .tk-input,
 .tk-select {
-width: 100%;
+min-width: 50%;
 padding: 8px;
-
-```
 border: 1px solid #333;
 border-radius: 4px;
-
 background: #1c1c22;
 color: var(--text-main);
-
 font-size: 14px;
-```
-
 }
 
 .tk-input:focus,
@@ -94,9 +87,15 @@ outline: none;
 border-color: var(--text-main);
 }
 
+.tk-select:hover {
+    cursor: pointer;
+}
+
 .tk-help {
 font-size: 12px;
 opacity: 0.6;
+/* カーソルなし */
+cursor: default;
 }
 
 /* ===============================
@@ -201,7 +200,6 @@ margin: 20px 0;
 
 @media (max-width: 640px) {
 
-```
 .tk-page {
     padding: 16px;
 }
@@ -215,6 +213,5 @@ margin: 20px 0;
     align-items: flex-start;
     gap: 10px;
 }
-```
 
 }
