@@ -2,35 +2,25 @@
 
 @section('title', 'タスク編集')
 
+@section('css')
+<link rel="stylesheet" href="/css/task-create.css">
+@endsection
+
 @section('content')
     <div class="tk-page">
 
         {{-- ページタイトル --}}
         <div class="tk-page__header">
             <div>
-                <div class="tk-page__en">Edit</div>
                 <h1 class="tk-page__title">タスク編集</h1>
             </div>
 
             <div class="tk-page__actions tk-row tk-row--gap">
-                <a href="{{ route('tasks.show', $task) }}" class="tk-btn tk-btn--ghost">
-                    ← 詳細へ戻る
-                </a>
                 <a href="{{ route('tasks.index', ['status' => $task->status]) }}" class="tk-btn tk-btn--ghost">
                     一覧へ
                 </a>
             </div>
         </div>
-
-        {{-- 注意（討伐待ち） --}}
-        @if ($task->status === 'stocked')
-            <div class="tk-alert tk-alert--warning">
-                <div class="tk-alert__title">このタスクは「討伐待ち」です</div>
-                <div class="tk-alert__text">
-                    内容は編集できますが、完了日時は「完了にした瞬間」に更新されます。
-                </div>
-            </div>
-        @endif
 
         {{-- 編集フォーム --}}
         <div class="tk-card">
@@ -40,7 +30,7 @@
 
                 {{-- タイトル --}}
                 <div class="tk-field">
-                    <label class="tk-label" for="title">タイトル</label>
+                    <label class="tk-label" for="title">タスク名</label>
                     <input
                         id="title"
                         name="title"
@@ -51,7 +41,6 @@
                         maxlength="100"
                         autocomplete="off"
                     >
-                    <div class="tk-help">100文字まで</div>
                 </div>
 
                 {{-- 期限 --}}
@@ -65,7 +54,6 @@
                         class="tk-input"
                         value="{{ old('due_date', optional($task->due_date)->format('Y-m-d')) }}"
                     >
-                    <div class="tk-help">完了しても期限は保持されます（TaskKillまで残す）</div>
                 </div>
 
                 {{-- 重要度 --}}
@@ -107,11 +95,10 @@
                 <div class="tk-field">
                     <label class="tk-label" for="difficulty">難度</label>
                     <select id="difficulty" name="difficulty" class="tk-select" required>
-                        <option value="easy" @selected(old('difficulty', $task->difficulty) === 'easy')>雑魚（Easy）</option>
-                        <option value="normal" @selected(old('difficulty', $task->difficulty) === 'normal')>中ボス（Normal）</option>
-                        <option value="hard" @selected(old('difficulty', $task->difficulty) === 'hard')>大ボス（Hard）</option>
+                        <option value="easy" @selected(old('difficulty', $task->difficulty) === 'easy')>雑魚</option>
+                        <option value="normal" @selected(old('difficulty', $task->difficulty) === 'normal')>中ボス</option>
+                        <option value="hard" @selected(old('difficulty', $task->difficulty) === 'hard')>大ボス</option>
                     </select>
-                    <div class="tk-help">TaskKillでの演出・統計に影響します</div>
                 </div>
 
                 {{-- 親タスク --}}
@@ -223,10 +210,6 @@
                                 required
                             >
                         </div>
-                    </div>
-
-                    <div class="tk-help">
-                        ここは「合計がいくつまで」みたいな制限も付けられる（次の段階で）
                     </div>
                 </div>
 

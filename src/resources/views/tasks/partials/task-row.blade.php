@@ -65,9 +65,9 @@
     <td>
         <div class="task-actions">
 
-            <a href="{{ route('tasks.edit', $task) }}" class="btn-edit">編集</a>
-
             @if($statusValue === 'pending')
+
+            <a href="{{ route('tasks.edit', $task) }}" class="btn-edit">編集</a>
 
                 <button type="button"
                     class="btn-complete"

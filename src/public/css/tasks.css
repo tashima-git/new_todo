@@ -165,7 +165,7 @@ body {
 .tasks-table th {
     background: #1c1c22;
     color: var(--text-sub);
-    font-size: 11px;
+    font-size: 14px;
 }
 
 .tasks-table th,
@@ -248,8 +248,10 @@ body {
 
 .task-actions {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ===============================
