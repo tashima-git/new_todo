@@ -81,6 +81,14 @@
                     削除
                 </button>
 
+                    @if($canHaveChildren)
+                        <a href="{{ route('tasks.create', ['parent_task_id' => $task->id]) }}"
+                        class="btn-child">
+                            ＋配下
+                        </a>
+                    @endif
+
+
             @else
 
                 <button type="button"
@@ -90,14 +98,6 @@
                 </button>
 
             @endif
-
-            @if($canHaveChildren)
-                <a href="{{ route('tasks.create', ['parent_task_id' => $task->id]) }}"
-                   class="btn-child">
-                    ＋配下
-                </a>
-            @endif
-
         </div>
     </td>
 </tr>

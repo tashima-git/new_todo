@@ -20,11 +20,6 @@ gap: 16px;
 margin-bottom: 20px;
 }
 
-.tk-page__en {
-font-size: 12px;
-opacity: 0.6;
-letter-spacing: 2px;
-}
 
 .tk-page__title {
 font-size: 26px;
@@ -53,7 +48,7 @@ margin-bottom: 16px;
 .tk-form {
 display: flex;
 flex-direction: column;
-gap: 18px;
+gap: 10px;
 }
 
 .tk-form__group {
@@ -63,7 +58,6 @@ gap: 6px;
 
 .tk-label {
 font-size: 14px;
-font-weight: bold;
 }
 
 .tk-required {
@@ -132,6 +126,7 @@ align-items: flex-start;
 .tk-grid {
 display: grid;
 gap: 14px;
+margin-top: 20px;
 }
 
 .tk-grid--2 {
@@ -166,9 +161,6 @@ margin-top: 6px;
 セクション
 =============================== */
 
-.tk-section {
-margin-top: 10px;
-}
 
 .tk-section__title {
 margin-bottom: 10px;

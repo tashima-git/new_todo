@@ -28,6 +28,24 @@ class TaskKillLog extends Model
         'task_completed_at' => 'datetime',
     ];
 
+    /**
+     * Scope for mob logs only.
+     */
+    public function scopeMob($query)
+    {
+        return $query->where('boss_type', 'mob');
+    }
+
+    /**
+     * Delete mob logs older than the given number of days.
+     */
+    public static function pruneOldMobLogs(int $days = 30): int
+    {
+        return static::mob()
+            ->where('created_at', '<', now()->subDays($days))
+            ->delete();
+    }
+
     // 所有者
     public function user()
     {

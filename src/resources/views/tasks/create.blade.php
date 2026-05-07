@@ -150,12 +150,7 @@ $hasParent = !empty($parentTaskId);
         <div class="tk-section">
 
             <div class="tk-section__title">
-                <div class="tk-section__en">Stats</div>
                 <div class="tk-section__ja">ステータス割り振り</div>
-            </div>
-
-            <div class="tk-help">
-                ※ 0でもOK。迷ったら「おすすめ」を押せばOK。
             </div>
 
             <div class="tk-row tk-row--gap">
@@ -181,7 +176,7 @@ $hasParent = !empty($parentTaskId);
 
                     <div class="tk-form__group">
                         <label class="tk-label" for="stat_{{ $key }}">
-                            {{ $label }}（{{ $key }}）
+                            {{ $label }}
                         </label>
 
                         <input
