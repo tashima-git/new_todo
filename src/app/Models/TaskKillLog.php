@@ -10,6 +10,7 @@ class TaskKillLog extends Model
     use HasFactory;
 
     protected $fillable = [
+        'task_id',
         'task_title',
         'task_created_at',
         'task_completed_at',
@@ -50,5 +51,10 @@ class TaskKillLog extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
     }
 }

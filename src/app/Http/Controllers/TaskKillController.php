@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ExecuteTaskKillRequest;
+use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Models\TaskKillLog;
 use Illuminate\Support\Facades\Auth;
@@ -28,61 +29,84 @@ class TaskKillController extends Controller
     }
 
     // ==============================
-    // 1体討伐（API）
+    // 討伐確定（API）
     // ==============================
     public function execute(ExecuteTaskKillRequest $request)
     {
         $user = Auth::user();
-        $taskId = $request->task_id;
+        $taskIds = $request->validated('task_ids');
 
-        $result = DB::transaction(function () use ($taskId, $user) {
+        $result = DB::transaction(function () use ($taskIds, $user) {
 
-            // ★ トランザクション内でロック
-            $task = Task::where('user_id', $user->id)
-                ->where('status', 'stocked')
-                ->where('id', $taskId)
+            // 演出開始前に、今回の討伐対象をまとめて確定する。
+            $tasks = Task::where('user_id', $user->id)
+                ->where('status', TaskStatus::Stocked->value)
+                ->whereIn('id', $taskIds)
+                ->orderBy('completed_at', 'asc')
                 ->lockForUpdate()
-                ->first();
+                ->get();
 
-            if (!$task) {
-                abort(404, 'タスクが見つかりません');
+            if ($tasks->isEmpty()) {
+                abort(404, '討伐待ちタスクが見つかりません');
             }
 
-            $bossType = $this->decideBossType($task);
+            if ($tasks->count() !== count(array_unique($taskIds))) {
+                abort(422, '討伐対象にできないタスクが含まれています');
+            }
 
-            $log = TaskKillLog::create([
-                'task_id'            => $task->id,
-                'task_title'         => $task->title,
-                'task_created_at'    => $task->created_at,
-                'task_completed_at'  => $task->completed_at ?? now(),
-                'user_id'            => $user->id,
-                'boss_type'          => $bossType,
-                'gained_patience'    => $task->stat_patience,
-                'gained_speed'       => $task->stat_speed,
-                'gained_focus'       => $task->stat_focus,
-                'gained_accuracy'    => $task->stat_accuracy,
-                'gained_life'        => $task->stat_life,
-                'gained_strategy'    => $task->stat_strategy,
-            ]);
+            $logIds = [];
+            $gained = [
+                'total_patience' => 0,
+                'total_speed' => 0,
+                'total_focus' => 0,
+                'total_accuracy' => 0,
+                'total_life' => 0,
+                'total_strategy' => 0,
+            ];
 
-            // ユーザーへステータス加算
-            $user->increment('total_patience',  $task->stat_patience);
-            $user->increment('total_speed',     $task->stat_speed);
-            $user->increment('total_focus',     $task->stat_focus);
-            $user->increment('total_accuracy',  $task->stat_accuracy);
-            $user->increment('total_life',      $task->stat_life);
-            $user->increment('total_strategy',  $task->stat_strategy);
+            foreach ($tasks as $task) {
+                $bossType = $this->decideBossType($task);
 
-            // セッションへ今回のログIDを追加
-            $existing = session()->get('taskkill_log_ids', []);
-            $existing[] = $log->id;
-            session()->put('taskkill_log_ids', $existing);
+                $log = TaskKillLog::create([
+                    'task_id'            => $task->id,
+                    'task_title'         => $task->title,
+                    'task_created_at'    => $task->created_at,
+                    'task_completed_at'  => $task->completed_at ?? now(),
+                    'user_id'            => $user->id,
+                    'boss_type'          => $bossType,
+                    'gained_patience'    => $task->stat_patience,
+                    'gained_speed'       => $task->stat_speed,
+                    'gained_focus'       => $task->stat_focus,
+                    'gained_accuracy'    => $task->stat_accuracy,
+                    'gained_life'        => $task->stat_life,
+                    'gained_strategy'    => $task->stat_strategy,
+                ]);
 
-            // タスク削除
-            $task->delete();
+                $logIds[] = $log->id;
+
+                $gained['total_patience'] += $task->stat_patience;
+                $gained['total_speed'] += $task->stat_speed;
+                $gained['total_focus'] += $task->stat_focus;
+                $gained['total_accuracy'] += $task->stat_accuracy;
+                $gained['total_life'] += $task->stat_life;
+                $gained['total_strategy'] += $task->stat_strategy;
+
+                $task->update([
+                    'status' => TaskStatus::Killed,
+                ]);
+            }
+
+            $user->increment('total_patience', $gained['total_patience']);
+            $user->increment('total_speed', $gained['total_speed']);
+            $user->increment('total_focus', $gained['total_focus']);
+            $user->increment('total_accuracy', $gained['total_accuracy']);
+            $user->increment('total_life', $gained['total_life']);
+            $user->increment('total_strategy', $gained['total_strategy']);
+
+            session()->put('taskkill_log_ids', $logIds);
 
             return [
-                'log_id' => $log->id,
+                'log_ids' => $logIds,
             ];
         });
 

@@ -58,6 +58,64 @@ function closeRecursively(row) {
     grandchildren.forEach(child => closeRecursively(child));
 }
 
+// ============================
+// 子タスク完了確認モーダル
+// ============================
+const completeChildrenModal = document.getElementById('completeChildrenModal');
+const confirmCompleteChildren = document.getElementById('confirmCompleteChildren');
+let pendingCompleteButton = null;
+
+if (completeChildrenModal) {
+    completeChildrenModal.classList.remove('is-open');
+    completeChildrenModal.setAttribute('aria-hidden', 'true');
+    completeChildrenModal.hidden = true;
+}
+
+function openCompleteChildrenModal(button) {
+    pendingCompleteButton = button;
+
+    if (!completeChildrenModal) return;
+
+    completeChildrenModal.hidden = false;
+    completeChildrenModal.classList.add('is-open');
+    completeChildrenModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeCompleteChildrenModal() {
+    pendingCompleteButton = null;
+
+    if (!completeChildrenModal) return;
+
+    completeChildrenModal.classList.remove('is-open');
+    completeChildrenModal.setAttribute('aria-hidden', 'true');
+    completeChildrenModal.hidden = true;
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('[data-modal-cancel]')) return;
+
+    closeCompleteChildrenModal();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+
+    closeCompleteChildrenModal();
+});
+
+if (confirmCompleteChildren) {
+    confirmCompleteChildren.addEventListener('click', async () => {
+        if (!pendingCompleteButton) return;
+
+        const button = pendingCompleteButton;
+        closeCompleteChildrenModal();
+
+        await postWithMethod(button.dataset.url, 'PATCH', {
+            confirm_children: '1'
+        });
+    });
+}
+
 
 // ============================
 // CSRF helper
@@ -70,7 +128,7 @@ function getCsrfToken() {
   return token;
 }
 
-async function postWithMethod(url, method) {
+async function postWithMethod(url, method, params = {}) {
   const csrf = getCsrfToken();
   if (!csrf) {
     alert('CSRFトークンが見つかりません。layoutの<meta>を確認してください。');
@@ -80,6 +138,10 @@ async function postWithMethod(url, method) {
   const body = new URLSearchParams();
   body.append('_token', csrf);
   body.append('_method', method);
+
+  Object.entries(params).forEach(([key, value]) => {
+    body.append(key, value);
+  });
 
   const res = await fetch(url, {
     method: 'POST',
@@ -115,7 +177,21 @@ async function postWithMethod(url, method) {
 // ============================
 document.addEventListener('click', async e => {
     const completeBtn = e.target.closest('.btn-complete');
-    if (completeBtn) { await postWithMethod(completeBtn.dataset.url, 'PATCH'); return; }
+    if (completeBtn) {
+        const hasPendingChildren = completeBtn.dataset.hasPendingChildren === '1';
+
+        if (hasPendingChildren) {
+            openCompleteChildrenModal(completeBtn);
+            return;
+        }
+
+        await postWithMethod(
+            completeBtn.dataset.url,
+            'PATCH',
+            hasPendingChildren ? { confirm_children: '1' } : {}
+        );
+        return;
+    }
 
     const uncompleteBtn = e.target.closest('.btn-uncomplete');
     if (uncompleteBtn) { await postWithMethod(uncompleteBtn.dataset.url, 'PATCH'); return; }

@@ -19,18 +19,22 @@ class TaskController extends Controller
      */
 public function index(Request $request)
 {
+    $user = Auth::user();
+    $userSetting = $user->setting;
     $status   = $request->input('status', 'pending');
     $category = $request->input('category');
     $bossType = $request->input('boss_type');
+    $urgentOnly = $request->boolean('urgent_only');
     $sortDue  = $request->boolean('sort_due', false);
-    $view     = $request->input('view', 'tree'); // ★ 追加
+    $view     = $request->input('view', $userSetting?->default_task_view ?? 'tree'); // ★ 追加
+    $perPage  = $userSetting?->tasks_per_page ?? 10;
 
-    $query = Auth::user()->tasks()
+    $query = $user->tasks()
         ->where(
             'status',
             $status === 'stocked'
-                ? TaskStatus::Stocked
-                : TaskStatus::Pending
+                ? TaskStatus::Stocked->value
+                : TaskStatus::Pending->value
         );
 
     /*
@@ -41,11 +45,40 @@ public function index(Request $request)
 
     if ($view === 'tree' && $status === 'pending') {
 
-        // ツリー表示（今まで通り）
-        $query->whereNull('parent_task_id')
-              ->with(['childTasks' => function ($q) {
-                  $q->with('childTasks');
-              }]);
+        // 未完了ツリーでは、未完了の親を持つ子だけを配下表示する。
+        // 親が完了/討伐済みの場合、未完了の子は孤立させずルート扱いで表示する。
+        $query->where(function ($q) use ($urgentOnly) {
+            $q->whereNull('parent_task_id')
+                ->orWhereDoesntHave('parentTask', function ($parentQuery) use ($urgentOnly) {
+                    $parentQuery->where('status', TaskStatus::Pending->value);
+
+                    if ($urgentOnly) {
+                        $parentQuery->where('is_urgent', true);
+                    }
+                });
+        })->with(['childTasks' => function ($q) use ($urgentOnly) {
+            $q->where('status', TaskStatus::Pending->value);
+
+            if ($urgentOnly) {
+                $q->where('is_urgent', true);
+            }
+
+            $q->with(['childTasks' => function ($q) use ($urgentOnly) {
+                $q->where('status', TaskStatus::Pending->value);
+
+                if ($urgentOnly) {
+                    $q->where('is_urgent', true);
+                }
+
+                $q->with(['childTasks' => function ($q) use ($urgentOnly) {
+                    $q->where('status', TaskStatus::Pending->value);
+
+                    if ($urgentOnly) {
+                        $q->where('is_urgent', true);
+                    }
+                }]);
+            }]);
+        }]);
 
     } else {
 
@@ -66,6 +99,10 @@ public function index(Request $request)
 
     if ($bossType) {
         $query->where('boss_type', $bossType);
+    }
+
+    if ($urgentOnly) {
+        $query->where('is_urgent', true);
     }
 
     /*
@@ -105,12 +142,13 @@ public function index(Request $request)
         }
     }
 
-    $tasks = $query->paginate(10)->withQueryString();
+    $tasks = $query->paginate($perPage)->withQueryString();
 
     return view('tasks.index', compact(
         'tasks',
         'status',
         'sortDue',
+        'urgentOnly',
         'view' // ★ 追加
     ));
 }
@@ -120,14 +158,16 @@ public function index(Request $request)
      */
     public function create(Request $request)
     {
+        $user = Auth::user();
         $parentTaskId = $request->query('parent_task_id');
         $parentTask = null;
+        $autoStrategyOnCreate = $user->setting?->auto_strategy_on_create ?? 1;
 
         if ($parentTaskId) {
-            $parentTask = Auth::user()->tasks()->find($parentTaskId);
+            $parentTask = $user->tasks()->find($parentTaskId);
         }
 
-        return view('tasks.create', compact('parentTaskId', 'parentTask'));
+        return view('tasks.create', compact('parentTaskId', 'parentTask', 'autoStrategyOnCreate'));
     }
 
     /**
@@ -164,6 +204,13 @@ public function index(Request $request)
     public function edit(Task $task)
     {
         $this->authorize('update', $task);
+
+        if ($task->status !== TaskStatus::Pending) {
+            return redirect()
+                ->route('tasks.index', ['status' => $task->status->value])
+                ->with('error', '編集できるのは未完了タスクのみです。');
+        }
+
         return view('tasks.edit', compact('task'));
     }
 
@@ -173,6 +220,12 @@ public function index(Request $request)
     public function update(UpdateTaskRequest $request, Task $task)
     {
         $this->authorize('update', $task);
+
+        if ($task->status !== TaskStatus::Pending) {
+            return redirect()
+                ->route('tasks.index', ['status' => $task->status->value])
+                ->with('error', '編集できるのは未完了タスクのみです。');
+        }
 
         $data = $request->validated();
         $data['is_urgent'] = $request->boolean('is_urgent');
@@ -191,14 +244,42 @@ public function index(Request $request)
     /**
      * 完了
      */
-    public function complete(Task $task)
+    public function complete(Request $request, Task $task)
     {
         $this->authorize('update', $task);
 
-        $task->update([
-            'status' => TaskStatus::Stocked,
-            'completed_at' => now(),
-        ]);
+        if ($task->status !== TaskStatus::Pending) {
+            return back()->with('error', '完了にできるのは未完了タスクのみです。');
+        }
+
+        $completedAt = now();
+        $taskIds = $this->descendantIds($task);
+        $taskIds[] = $task->id;
+        $hasPendingChildren = Auth::user()
+            ->tasks()
+            ->whereIn('id', $this->descendantIds($task))
+            ->where('status', TaskStatus::Pending->value)
+            ->exists();
+
+        if ($hasPendingChildren && !$request->boolean('confirm_children')) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => '未完了の子タスクがあります。まとめて完了にするか確認してください。',
+                    'requires_confirmation' => true,
+                ], 409);
+            }
+
+            return back()->with('error', '未完了の子タスクがあります。確認してから完了してください。');
+        }
+
+        Auth::user()
+            ->tasks()
+            ->whereIn('id', $taskIds)
+            ->where('status', TaskStatus::Pending->value)
+            ->update([
+                'status' => TaskStatus::Stocked->value,
+                'completed_at' => $completedAt,
+            ]);
 
         return back()->with('success', 'タスクを完了しました。');
     }
@@ -210,10 +291,21 @@ public function index(Request $request)
     {
         $this->authorize('update', $task);
 
-        $task->update([
-            'status' => TaskStatus::Pending,
-            'completed_at' => null,
-        ]);
+        if ($task->status !== TaskStatus::Stocked) {
+            return back()->with('error', '未完了に戻せるのは討伐待ちタスクのみです。');
+        }
+
+        $taskIds = $this->descendantIds($task);
+        $taskIds[] = $task->id;
+
+        Auth::user()
+            ->tasks()
+            ->whereIn('id', $taskIds)
+            ->where('status', TaskStatus::Stocked->value)
+            ->update([
+                'status' => TaskStatus::Pending->value,
+                'completed_at' => null,
+            ]);
 
         return back()->with('success', 'タスクを未完了に戻しました。');
     }
@@ -275,6 +367,7 @@ public function index(Request $request)
             if ($data['action'] === 'delete'
                 && $task->status === TaskStatus::Pending) {
 
+                $task->childTasks()->delete();
                 $task->delete();
             }
         }
@@ -300,5 +393,21 @@ public function index(Request $request)
         if ($days >= 7)  return BossType::MidBoss;
 
         return BossType::Mob;
+    }
+
+    private function descendantIds(Task $task): array
+    {
+        $ids = [];
+        $children = Auth::user()
+            ->tasks()
+            ->where('parent_task_id', $task->id)
+            ->get();
+
+        foreach ($children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $this->descendantIds($child));
+        }
+
+        return $ids;
     }
 }

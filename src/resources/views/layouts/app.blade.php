@@ -14,7 +14,14 @@
     @yield('css')
 </head>
 
-<body>
+@php
+    $audioSetting = auth()->check() ? auth()->user()->setting : null;
+@endphp
+
+<body
+    data-se-volume="{{ $audioSetting?->se_volume ?? 50 }}"
+    data-status-se-volume="{{ $audioSetting?->status_se_volume ?? 50 }}"
+>
 
     {{-- ヘッダー --}}
     <header class="tk-header">
@@ -59,6 +66,13 @@
                     <span class="tk-nav__en">Help</span>
                     <span class="tk-nav__ja">ヘルプ</span>
                 </a>
+
+                @auth
+                    <a href="{{ route('settings.index') }}" class="tk-nav__item js-nav-sound">
+                        <span class="tk-nav__en">Config</span>
+                        <span class="tk-nav__ja">設定</span>
+                    </a>
+                @endauth
             </nav>
         </div>
     </header>
@@ -106,7 +120,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const audio = new Audio("/sounds/click.mp3");
-    audio.volume = 0.3;
+    const seVolume = Number.parseInt(document.body.dataset.seVolume || "50", 10);
+    audio.volume = Math.min(Math.max(seVolume, 0), 100) / 100;
 
     document.querySelectorAll(".js-nav-sound").forEach(link => {
 

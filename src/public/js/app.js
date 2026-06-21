@@ -2091,10 +2091,12 @@ if (taskKillEl) {
     // Blade 側から渡されたタスクデータと実行 URL を取得
     var tasks = JSON.parse(taskKillEl.dataset.tasks || '[]');
     var executeUrl = taskKillEl.dataset.executeUrl || null;
+    var taskkillSeVolume = Number.parseInt(taskKillEl.dataset.taskkillSeVolume || '50', 10);
     var root = react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot(taskKillEl);
     root.render(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_components_TaskKill__WEBPACK_IMPORTED_MODULE_2__["default"], {
       tasks: tasks,
-      executeUrl: executeUrl
+      executeUrl: executeUrl,
+      taskkillSeVolume: taskkillSeVolume
     }));
   } catch (error) {
     console.error('TaskKill mount error:', error);
@@ -2110,11 +2112,15 @@ if (resultEl) {
     // Blade 側から渡されたログと合計値データを取得
     var logs = JSON.parse(resultEl.dataset.logs || '[]');
     var total = JSON.parse(resultEl.dataset.total || '{}');
+    var tasksUrl = resultEl.dataset.tasksUrl || '/tasks';
+    var recordUrl = resultEl.dataset.recordUrl || '/record';
     var _root = react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot(resultEl);
     _root.render(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)((react__WEBPACK_IMPORTED_MODULE_0___default().StrictMode), {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_components_TaskKillResult__WEBPACK_IMPORTED_MODULE_3__["default"], {
         logs: logs,
-        total: total
+        total: total,
+        tasksUrl: tasksUrl,
+        recordUrl: recordUrl
       })
     }));
   } catch (error) {
@@ -2190,7 +2196,9 @@ function TaskKill(_ref) {
   var _tasks$index;
   var _ref$tasks = _ref.tasks,
     tasks = _ref$tasks === void 0 ? [] : _ref$tasks,
-    executeUrl = _ref.executeUrl;
+    executeUrl = _ref.executeUrl,
+    _ref$taskkillSeVolume = _ref.taskkillSeVolume,
+    taskkillSeVolume = _ref$taskkillSeVolume === void 0 ? 50 : _ref$taskkillSeVolume;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
     _useState2 = _slicedToArray(_useState, 2),
     index = _useState2[0],
@@ -2199,32 +2207,54 @@ function TaskKill(_ref) {
     _useState4 = _slicedToArray(_useState3, 2),
     isCutting = _useState4[0],
     setIsCutting = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    isBulkCutting = _useState6[0],
+    setIsBulkCutting = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState8 = _slicedToArray(_useState7, 2),
+    isExecuting = _useState8[0],
+    setIsExecuting = _useState8[1];
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+    _useState0 = _slicedToArray(_useState9, 2),
+    errorMessage = _useState0[0],
+    setErrorMessage = _useState0[1];
   var indexRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(0);
   var holdingRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
   var runningRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
   var mountedRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(true);
+  var executedRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
 
   // ★ SE
   var slashAudioRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var layeredSlashAudioRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var currentTask = (_tasks$index = tasks[index]) !== null && _tasks$index !== void 0 ? _tasks$index : null;
 
   // =========================
   // API
   // =========================
-  var executeKill = /*#__PURE__*/function () {
-    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(task) {
+  var executeAllKills = /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var _document$querySelect, response, data, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
-            if (task) {
+            if (!executedRef.current) {
               _context.n = 1;
               break;
             }
-            return _context.a(2, false);
+            return _context.a(2, true);
           case 1:
-            _context.p = 1;
-            _context.n = 2;
+            if (!(tasks.length === 0)) {
+              _context.n = 2;
+              break;
+            }
+            return _context.a(2, false);
+          case 2:
+            _context.p = 2;
+            setIsExecuting(true);
+            setErrorMessage("");
+            _context.n = 3;
             return fetch(executeUrl, {
               method: "POST",
               headers: {
@@ -2232,38 +2262,50 @@ function TaskKill(_ref) {
                 "X-CSRF-TOKEN": (_document$querySelect = document.querySelector('meta[name="csrf-token"]')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.getAttribute("content")
               },
               body: JSON.stringify({
-                task_id: task.id
+                task_ids: tasks.map(function (task) {
+                  return task.id;
+                })
               })
             });
-          case 2:
+          case 3:
             response = _context.v;
             if (response.ok) {
-              _context.n = 3;
+              _context.n = 4;
               break;
             }
             console.error("HTTP ERROR:", response.status);
+            setErrorMessage("討伐処理に失敗しました。画面を更新してもう一度試してください。");
             return _context.a(2, false);
-          case 3:
-            _context.n = 4;
-            return response.json();
           case 4:
+            _context.n = 5;
+            return response.json();
+          case 5:
             data = _context.v;
             if (data.success) {
-              _context.n = 5;
+              _context.n = 6;
               break;
             }
+            setErrorMessage("討伐処理に失敗しました。画面を更新してもう一度試してください。");
             return _context.a(2, false);
-          case 5:
-            return _context.a(2, true);
           case 6:
-            _context.p = 6;
+            executedRef.current = true;
+            return _context.a(2, true);
+          case 7:
+            _context.p = 7;
             _t = _context.v;
             console.error("Fetch error:", _t);
+            setErrorMessage("通信に失敗しました。ネットワーク状態を確認してください。");
             return _context.a(2, false);
+          case 8:
+            _context.p = 8;
+            setIsExecuting(false);
+            return _context.f(8);
+          case 9:
+            return _context.a(2);
         }
-      }, _callee, null, [[1, 6]]);
+      }, _callee, null, [[2, 7, 8, 9]]);
     }));
-    return function executeKill(_x) {
+    return function executeAllKills() {
       return _ref2.apply(this, arguments);
     };
   }();
@@ -2273,16 +2315,18 @@ function TaskKill(_ref) {
   // =========================
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     slashAudioRef.current = new Audio("/sounds/slash.mp3");
-
-    // 音量調整
-    slashAudioRef.current.volume = 0.6;
-  }, []);
+    layeredSlashAudioRef.current = new Audio("/sounds/slash.mp3");
+    var volume = Number.isFinite(taskkillSeVolume) ? taskkillSeVolume : 50;
+    var normalizedVolume = Math.min(Math.max(volume, 0), 100) / 100;
+    slashAudioRef.current.volume = normalizedVolume;
+    layeredSlashAudioRef.current.volume = normalizedVolume;
+  }, [taskkillSeVolume]);
 
   // =========================
   // SE 再生
   // =========================
   var playSlash = function playSlash() {
-    var audio = slashAudioRef.current;
+    var audio = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : slashAudioRef.current;
     if (!audio) return;
     audio.currentTime = 0;
 
@@ -2295,13 +2339,19 @@ function TaskKill(_ref) {
     }
     audio.play()["catch"](function () {});
   };
+  var playLayeredSlash = function playLayeredSlash() {
+    playSlash(slashAudioRef.current);
+    window.setTimeout(function () {
+      playSlash(layeredSlashAudioRef.current);
+    }, 90);
+  };
 
   // =========================
   // 1タスク討伐
   // =========================
   var killOnce = /*#__PURE__*/function () {
     var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var task, success, nextIndex;
+      var task, executed, nextIndex;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.n) {
           case 0:
@@ -2319,8 +2369,19 @@ function TaskKill(_ref) {
             return _context2.a(2);
           case 2:
             runningRef.current = true;
-
+            _context2.n = 3;
+            return executeAllKills();
+          case 3:
+            executed = _context2.v;
+            if (executed) {
+              _context2.n = 4;
+              break;
+            }
+            runningRef.current = false;
+            return _context2.a(2);
+          case 4:
             // 斬撃開始
+            setIsBulkCutting(false);
             setIsCutting(true);
 
             // ★ SE再生
@@ -2328,37 +2389,31 @@ function TaskKill(_ref) {
 
             // debug
             console.log("cut start");
-            _context2.n = 3;
-            return executeKill(task);
-          case 3:
-            success = _context2.v;
-            if (!success) {
-              _context2.n = 6;
-              break;
-            }
-            _context2.n = 4;
+
+            // エフェクトを見せる時間
+            _context2.n = 5;
             return new Promise(function (r) {
               return setTimeout(r, 250);
             });
-          case 4:
+          case 5:
             nextIndex = indexRef.current + 1;
             indexRef.current = nextIndex;
             setIndex(nextIndex);
             if (!(nextIndex >= tasks.length)) {
-              _context2.n = 6;
+              _context2.n = 7;
               break;
             }
-            _context2.n = 5;
+            _context2.n = 6;
             return new Promise(function (r) {
               return setTimeout(r, 200);
             });
-          case 5:
+          case 6:
             window.location.href = "/taskkill/result";
             return _context2.a(2);
-          case 6:
+          case 7:
             setIsCutting(false);
             runningRef.current = false;
-          case 7:
+          case 8:
             return _context2.a(2);
         }
       }, _callee2);
@@ -2415,6 +2470,64 @@ function TaskKill(_ref) {
   var stopRapid = function stopRapid() {
     holdingRef.current = false;
   };
+  var waitForNextFrame = function waitForNextFrame() {
+    return new Promise(function (resolve) {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(resolve);
+      });
+    });
+  };
+  var skipToResult = /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+      var executed;
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.n) {
+          case 0:
+            if (!runningRef.current) {
+              _context4.n = 1;
+              break;
+            }
+            return _context4.a(2);
+          case 1:
+            runningRef.current = true;
+            holdingRef.current = false;
+            _context4.n = 2;
+            return executeAllKills();
+          case 2:
+            executed = _context4.v;
+            if (!executed) {
+              _context4.n = 6;
+              break;
+            }
+            setIsCutting(false);
+            setIsBulkCutting(false);
+            _context4.n = 3;
+            return waitForNextFrame();
+          case 3:
+            setIsBulkCutting(true);
+            setIsCutting(true);
+            _context4.n = 4;
+            return waitForNextFrame();
+          case 4:
+            playLayeredSlash();
+            _context4.n = 5;
+            return new Promise(function (r) {
+              return setTimeout(r, 720);
+            });
+          case 5:
+            window.location.href = "/taskkill/result";
+            return _context4.a(2);
+          case 6:
+            runningRef.current = false;
+          case 7:
+            return _context4.a(2);
+        }
+      }, _callee4);
+    }));
+    return function skipToResult() {
+      return _ref5.apply(this, arguments);
+    };
+  }();
 
   // =========================
   // cleanup
@@ -2428,6 +2541,10 @@ function TaskKill(_ref) {
       if (slashAudioRef.current) {
         slashAudioRef.current.pause();
         slashAudioRef.current = null;
+      }
+      if (layeredSlashAudioRef.current) {
+        layeredSlashAudioRef.current.pause();
+        layeredSlashAudioRef.current = null;
       }
     };
   }, []);
@@ -2445,11 +2562,9 @@ function TaskKill(_ref) {
     });
   }
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-    style: {
-      textAlign: "center"
-    },
+    className: "tk-kill-screen",
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "tk-kill-card",
+      className: "tk-kill-card ".concat(isBulkCutting ? "bulk-cut" : ""),
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
         className: "tk-card-layer top ".concat(isCutting ? "cut" : ""),
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
@@ -2470,9 +2585,12 @@ function TaskKill(_ref) {
         })]
       }), isCutting && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
         className: "tk-slash"
+      }), isCutting && isBulkCutting && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+        className: "tk-slash tk-slash--mirror"
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
       className: "tk-kill-btn",
+      disabled: isExecuting,
       onMouseDown: startRapid,
       onMouseUp: stopRapid,
       onMouseLeave: stopRapid,
@@ -2482,7 +2600,22 @@ function TaskKill(_ref) {
           killOnce();
         }
       },
-      children: "\u8A0E\u4F10"
+      children: isExecuting ? "討伐準備中..." : "討伐"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "tk-kill-bulk-action",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+        type: "button",
+        className: "tk-kill-bulk-btn",
+        disabled: isExecuting,
+        onClick: skipToResult,
+        children: isExecuting ? "討伐準備中..." : "まとめて討伐"
+      })
+    }), errorMessage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      style: {
+        color: "#b91c1c",
+        marginTop: "16px"
+      },
+      children: errorMessage
     })]
   });
 }
@@ -2534,12 +2667,36 @@ function TaskKillResult(_ref) {
   var _ref$logs = _ref.logs,
     logs = _ref$logs === void 0 ? [] : _ref$logs,
     _ref$total = _ref.total,
-    total = _ref$total === void 0 ? {} : _ref$total;
+    total = _ref$total === void 0 ? {} : _ref$total,
+    _ref$tasksUrl = _ref.tasksUrl,
+    tasksUrl = _ref$tasksUrl === void 0 ? '/tasks' : _ref$tasksUrl,
+    _ref$recordUrl = _ref.recordUrl,
+    recordUrl = _ref$recordUrl === void 0 ? '/record' : _ref$recordUrl;
   // =============================
   // 安全なデータ生成
   // =============================
   var safeLogs = Array.isArray(logs === null || logs === void 0 ? void 0 : logs.data) ? logs.data : Array.isArray(logs) ? logs : [];
   var safeTotal = total !== null && total !== void 0 ? total : {};
+  var defeatedCount = safeLogs.length;
+  var formattedLogs = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return safeLogs.map(function (log, index) {
+      var _ref2, _log$task_completed_a, _log$id, _log$task_title, _bossTypeLabels$log$b;
+      var dateSource = (_ref2 = (_log$task_completed_a = log === null || log === void 0 ? void 0 : log.task_completed_at) !== null && _log$task_completed_a !== void 0 ? _log$task_completed_a : log === null || log === void 0 ? void 0 : log.created_at) !== null && _ref2 !== void 0 ? _ref2 : null;
+      var date = dateSource ? new Date(dateSource) : null;
+      return {
+        id: (_log$id = log === null || log === void 0 ? void 0 : log.id) !== null && _log$id !== void 0 ? _log$id : "log-".concat(index),
+        title: (_log$task_title = log === null || log === void 0 ? void 0 : log.task_title) !== null && _log$task_title !== void 0 ? _log$task_title : '-',
+        bossType: (_bossTypeLabels$log$b = bossTypeLabels[log === null || log === void 0 ? void 0 : log.boss_type]) !== null && _bossTypeLabels$log$b !== void 0 ? _bossTypeLabels$log$b : '不明',
+        defeatedAt: date && !Number.isNaN(date.getTime()) ? date.toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : '-'
+      };
+    });
+  }, [safeLogs]);
 
   // =============================
   // state
@@ -2617,74 +2774,117 @@ function TaskKillResult(_ref) {
   // UI
   // =============================
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-    className: "space-y-6",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h1", {
-        className: "text-2xl font-bold",
+    className: "tk-result-screen",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("header", {
+      className: "tk-result-title-frame",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+        className: "tk-result-title-mark",
+        children: "\u25C7"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h1", {
         children: "\u8A0E\u4F10\u7D50\u679C"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-        className: "text-sm text-gray-600 mt-1",
-        children: "\u4ECA\u65E5\u306E\u8A0E\u4F10\u304C\u5B8C\u4E86\u3057\u307E\u3057\u305F\u3002\u30B9\u30C6\u30FC\u30BF\u30B9\u304C\u4E0A\u6607\u3057\u3066\u3044\u307E\u3059\u3002"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+        className: "tk-result-title-mark",
+        children: "\u25C7"
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "rounded border bg-white p-4",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-        className: "font-bold mb-3",
-        children: "\u4ECA\u56DE\u306E\u7372\u5F97\u30B9\u30C6\u30FC\u30BF\u30B9"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("section", {
+      className: "tk-result-panel",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "tk-result-complete",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "tk-result-swords",
+          "aria-hidden": "true"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "tk-result-complete-text",
+          children: "\u8A0E\u4F10\u5B8C\u4E86"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "tk-result-slash-line",
+          "aria-hidden": "true"
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "tk-result-count-box",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+          children: "\u8A0E\u4F10\u6570"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("strong", {
+          children: defeatedCount
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+          children: "\u4F53"
+        })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-        className: "grid grid-cols-2 gap-3 text-sm",
-        children: Object.entries(statLabels).map(function (_ref2) {
-          var _ref3 = _slicedToArray(_ref2, 2),
-            key = _ref3[0],
-            label = _ref3[1];
+        className: "tk-result-section-label",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+          children: "\u7372\u5F97\u30B9\u30C6\u30FC\u30BF\u30B9"
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+        className: "tk-result-stats-grid",
+        children: Object.entries(statLabels).map(function (_ref3) {
+          var _ref4 = _slicedToArray(_ref3, 2),
+            key = _ref4[0],
+            label = _ref4[1];
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-            className: "flex items-center justify-between border rounded px-3 py-2",
+            className: "tk-result-stat-card",
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+              className: "tk-result-stat-label",
               children: label
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("span", {
-              className: "font-bold",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("strong", {
+              className: "tk-result-stat-value",
               children: ["+", displayStats[key]]
             })]
           }, key);
         })
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "rounded border bg-white p-4",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "flex items-center justify-between mb-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-          className: "font-bold",
-          children: "\u8A0E\u4F10\u3057\u305F\u6575"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-          className: "text-sm text-gray-600",
-          children: [safeLogs.length, "\u4F53"]
-        })]
-      }), safeLogs.length === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-        className: "text-sm text-gray-600",
-        children: "\u8A0E\u4F10\u30ED\u30B0\u304C\u3042\u308A\u307E\u305B\u3093\u3002"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-        className: "space-y-3",
-        children: safeLogs.map(function (log, i) {
-          var _log$id, _bossTypeLabels$log$b, _log$task_title;
-          if (!log) return null;
-          var date = log.task_completed_at ? new Date(log.task_completed_at) : null;
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-            className: "\n                                    rounded border p-3 bg-white\n                                    transition-opacity duration-500\n                                    ".concat(showLogs ? "opacity-100" : "opacity-0", "\n                                "),
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-              className: "font-bold",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-                className: "ml-2 text-sm text-gray-600",
-                children: (_bossTypeLabels$log$b = bossTypeLabels[log.boss_type]) !== null && _bossTypeLabels$log$b !== void 0 ? _bossTypeLabels$log$b : '不明'
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-              className: "text-sm mt-1",
-              children: ["\u30BF\u30B9\u30AF\u540D\uFF1A", (_log$task_title = log.task_title) !== null && _log$task_title !== void 0 ? _log$task_title : '-']
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-              className: "text-xs text-gray-500 mt-1",
-              children: ["\u8A0E\u4F10\u65E5\u6642\uFF1A", date ? date.toLocaleString('ja-JP') : '-']
-            })]
-          }, "taskkill-log-".concat((_log$id = log.id) !== null && _log$id !== void 0 ? _log$id : i));
+        className: "tk-result-log-heading",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+          children: "\u4ECA\u56DE\u306E\u8A0E\u4F10"
         })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "tk-result-log-table ".concat(showLogs ? 'is-visible' : ''),
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+          className: "tk-result-log-row tk-result-log-row--head",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+            children: "\u72B6\u614B"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+            children: "\u30BF\u30B9\u30AF\u540D"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+            children: "\u30DC\u30B9\u7A2E\u5225"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+            children: "\u8A0E\u4F10\u65E5\u6642"
+          })]
+        }), formattedLogs.length === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "tk-result-empty-log",
+          children: "\u8A0E\u4F10\u30ED\u30B0\u304C\u3042\u308A\u307E\u305B\u3093\u3002"
+        }), formattedLogs.map(function (log) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+            className: "tk-result-log-row",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+                className: "tk-result-status-badge",
+                children: "\u8A0E\u4F10\u6E08"
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+              className: "tk-result-task-title",
+              children: log.title
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+                className: "tk-result-type-badge",
+                children: log.bossType
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+              className: "tk-result-date",
+              children: log.defeatedAt
+            })]
+          }, log.id);
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "tk-result-actions",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+          className: "tk-result-button",
+          href: tasksUrl,
+          children: "\u25B6 \u30BF\u30B9\u30AF\u4E00\u89A7\u3078\u623B\u308B"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+          className: "tk-result-button",
+          href: recordUrl,
+          children: "\u25B6 \u6226\u7E3E\u3092\u898B\u308B"
+        })]
       })]
     })]
   });

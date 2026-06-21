@@ -3,9 +3,9 @@
 =============================== */
 
 .tk-page {
-max-width: 760px;
+max-width: 820px;
 margin: 0 auto;
-padding: 20px;
+padding: 24px 20px;
 }
 
 /* ===============================
@@ -22,8 +22,9 @@ margin-bottom: 20px;
 
 
 .tk-page__title {
-font-size: 26px;
+font-size: 24px;
 letter-spacing: 2px;
+margin: 0;
 }
 
 /* ===============================
@@ -34,7 +35,83 @@ letter-spacing: 2px;
 border: 2px solid var(--border-main);
 border-radius: 8px;
 background: var(--bg-sub);
-padding: 20px;
+padding: 24px;
+}
+
+.tk-delete-inline {
+display: flex;
+justify-content: flex-end;
+margin-top: 14px;
+}
+
+.tk-confirm-modal {
+display: none;
+position: fixed;
+inset: 0;
+z-index: 1000;
+align-items: center;
+justify-content: center;
+}
+
+.tk-confirm-modal[hidden] {
+display: none !important;
+}
+
+.tk-confirm-modal.is-open {
+display: flex;
+}
+
+.tk-confirm-modal__backdrop {
+position: absolute;
+inset: 0;
+background: rgba(0, 0, 0, 0.72);
+}
+
+.tk-confirm-modal__panel {
+position: relative;
+width: min(92vw, 440px);
+padding: 22px;
+border: 2px solid var(--text-main);
+border-radius: 10px;
+background: var(--bg-sub);
+color: var(--text-main);
+box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.tk-confirm-modal__title {
+margin-bottom: 12px;
+font-size: 20px;
+font-weight: bold;
+}
+
+.tk-confirm-modal__body {
+line-height: 1.7;
+opacity: 0.8;
+}
+
+.tk-confirm-modal__actions {
+display: flex;
+justify-content: flex-end;
+gap: 10px;
+margin-top: 20px;
+}
+
+.tk-confirm-modal__cancel,
+.tk-confirm-modal__delete {
+padding: 8px 16px;
+border: 2px solid var(--text-main);
+border-radius: 6px;
+cursor: pointer;
+}
+
+.tk-confirm-modal__cancel {
+background: transparent;
+color: var(--text-main);
+}
+
+.tk-confirm-modal__delete {
+background: var(--bg-button);
+color: var(--text-main);
 }
 
 .tk-card--mb {
@@ -48,16 +125,37 @@ margin-bottom: 16px;
 .tk-form {
 display: flex;
 flex-direction: column;
-gap: 10px;
+gap: 20px;
 }
 
-.tk-form__group {
+.tk-form *,
+.tk-form *::before,
+.tk-form *::after {
+box-sizing: border-box;
+}
+
+.tk-form__group,
+.tk-field {
+display: flex;
 flex-direction: column;
 gap: 6px;
 }
 
+.tk-form-grid {
+display: grid;
+gap: 16px 18px;
+}
+
+.tk-form-grid--meta {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+align-items: start;
+}
+
 .tk-label {
-font-size: 14px;
+font-size: 13px;
+font-weight: bold;
+color: var(--text-sub);
+letter-spacing: 0.04em;
 }
 
 .tk-required {
@@ -66,28 +164,117 @@ color: #a34e45;
 
 .tk-input,
 .tk-select {
-min-width: 50%;
-padding: 8px;
+width: 100%;
+min-width: 0;
+min-height: 42px;
+padding: 9px 10px;
 border: 1px solid #333;
 border-radius: 4px;
 background: #1c1c22;
 color: var(--text-main);
-font-size: 14px;
+font-size: 15px;
+line-height: 1.4;
+}
+
+.tk-select {
+cursor: pointer;
+}
+
+.tk-textarea {
+width: 100%;
+min-height: 92px;
+line-height: 1.6;
+resize: vertical;
 }
 
 .tk-input:focus,
-.tk-select:focus {
+.tk-select:focus,
+.tk-date-button:focus {
 outline: none;
 border-color: var(--text-main);
 }
 
-.tk-select:hover {
-    cursor: pointer;
+.tk-date-field {
+display: flex;
+align-items: stretch;
+gap: 8px;
+width: 100%;
+}
+
+.tk-date-input {
+flex: 1;
+}
+
+.tk-date-button {
+min-width: 118px;
+padding: 9px 12px;
+border: 1px solid var(--text-main);
+border-radius: 4px;
+background: var(--bg-button);
+color: var(--text-main);
+cursor: pointer;
+font-size: 14px;
+line-height: 1.4;
+white-space: nowrap;
+}
+
+.tk-date-button:hover {
+background: linear-gradient(#686868, #242424);
+}
+
+.tk-stat-input-with-side {
+display: flex;
+align-items: stretch;
+gap: 8px;
+}
+
+.tk-stat-input-with-side .tk-input {
+flex: 1;
+}
+
+.tk-stat-auto-bonus {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+padding: 0 4px;
+color: var(--text-main);
+font-size: 13px;
+font-weight: bold;
+white-space: nowrap;
+}
+
+.tk-btn {
+display: inline-block;
+padding: 9px 16px;
+border: 2px solid var(--text-main);
+border-radius: 6px;
+background: var(--bg-button);
+color: var(--text-main);
+cursor: pointer;
+font-size: 14px;
+line-height: 1.4;
+text-decoration: none;
+transition: 0.15s;
+}
+
+.tk-btn:hover {
+opacity: 0.85;
+background: linear-gradient(#686868, #242424);
+}
+
+.tk-btn--ghost {
+background: transparent;
+}
+
+.tk-btn--primary,
+.tk-btn--sub {
+background: var(--bg-button);
 }
 
 .tk-help {
 font-size: 12px;
-opacity: 0.6;
+line-height: 1.5;
+opacity: 0.62;
 /* カーソルなし */
 cursor: default;
 }
@@ -100,6 +287,15 @@ cursor: default;
 display: flex;
 align-items: center;
 gap: 8px;
+width: fit-content;
+min-height: 42px;
+padding: 8px 0;
+cursor: pointer;
+font-size: 14px;
+}
+
+.tk-check input {
+cursor: pointer;
 }
 
 /* ===============================
@@ -125,12 +321,16 @@ align-items: flex-start;
 
 .tk-grid {
 display: grid;
-gap: 14px;
-margin-top: 20px;
+gap: 14px 18px;
+margin-top: 14px;
 }
 
 .tk-grid--2 {
 grid-template-columns: repeat(2, 1fr);
+}
+
+.tk-grid--2 input[type="number"].tk-input {
+max-width: 96px;
 }
 
 /* ===============================
@@ -183,7 +383,7 @@ font-weight: bold;
 .tk-hr {
 border: none;
 border-top: 1px solid #333;
-margin: 20px 0;
+margin: 4px 0;
 }
 
 /* ===============================
@@ -200,10 +400,27 @@ margin: 20px 0;
     grid-template-columns: 1fr;
 }
 
+.tk-form-grid--meta {
+    grid-template-columns: 1fr;
+}
+
 .tk-page__header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+}
+
+.tk-date-field {
+    flex-direction: column;
+    max-width: none;
+}
+
+.tk-date-button {
+    width: 100%;
+}
+
+.tk-row--right {
+    justify-content: flex-start;
 }
 
 }

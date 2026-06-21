@@ -19,6 +19,9 @@ return new class extends Migration
             // タスク名
             $table->string('title');
 
+            // 内容メモ（任意）
+            $table->text('memo')->nullable();
+
             // カテゴリ（仕事/プライベート）
             $table->enum('category', ['work', 'private']);
 

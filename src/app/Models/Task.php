@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\BossType;
-use App\Enums\DueType;
 use App\Enums\TaskCategory;
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Model;
@@ -15,14 +14,13 @@ class Task extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'memo',
 
         // タスク種別
-        'difficulty',
         'boss_type',
 
         // 分類
         'category',
-        'due_type',
         'due_date',
         'importance',
         'is_urgent',
@@ -44,13 +42,11 @@ class Task extends Model
     ];
 
     protected $casts = [
-        'difficulty' => 'string',
         'boss_type' => BossType::class,
         'is_urgent' => 'boolean',
         'due_date' => 'date',
         'completed_at' => 'datetime',
         'category' => TaskCategory::class,
-        'due_type' => DueType::class,
         'status' => TaskStatus::class,
     ];
 
@@ -100,6 +96,6 @@ class Task extends Model
      */
     public function childrenRecursive(): HasMany
     {
-        return $this->children()->with('childrenRecursive');
+        return $this->childTasks()->with('childrenRecursive');
     }
 }

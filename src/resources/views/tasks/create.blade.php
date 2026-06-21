@@ -13,6 +13,8 @@ $parentTaskId = old('parent_task_id', request('parent_task_id'));
 $hasParent = !empty($parentTaskId);
 @endphp
 
+<div class="tk-page">
+
 {{-- ヘッダー --}}
 <div class="tk-page__header">
     <div>
@@ -89,59 +91,82 @@ $hasParent = !empty($parentTaskId);
             </div>
         </div>
 
-        {{-- カテゴリ --}}
+        {{-- メモ --}}
         <div class="tk-form__group">
-            <label class="tk-label" for="category">
-                カテゴリ <span class="tk-required">*</span>
-            </label>
-            <select id="category" name="category" class="tk-select" required>
-                <option value="work" {{ old('category','work')==='work'?'selected':'' }}>
-                    仕事・学校
-                </option>
-                <option value="private" {{ old('category')==='private'?'selected':'' }}>
-                    プライベート
-                </option>
-            </select>
-        </div>
-
-        {{-- 期限 --}}
-        <div class="tk-form__group">
-            <label class="tk-label" for="due_date">期限</label>
-            <input
-                type="date"
-                id="due_date"
-                name="due_date"
-                class="tk-input"
-                min="{{ now()->toDateString() }}"
-                value="{{ old('due_date') }}"
-            >
-        </div>
-
-        {{-- 重要度 --}}
-        <div class="tk-form__group">
-            <label class="tk-label" for="importance">
-                重要度 <span class="tk-required">*</span>
-            </label>
-            <select id="importance" name="importance" class="tk-select" required>
-                @for ($i = 1; $i <= 5; $i++)
-                    <option value="{{ $i }}" {{ (int)old('importance',3)===$i?'selected':'' }}>
-                        {{ $i }}
-                    </option>
-                @endfor
-            </select>
+            <label class="tk-label" for="memo">メモ・内容</label>
+            <textarea
+                id="memo"
+                name="memo"
+                class="tk-input tk-textarea"
+                maxlength="2000"
+                rows="4"
+                placeholder="必要な手順、補足、完了条件などを自由に書けます"
+            >{{ old('memo') }}</textarea>
             <div class="tk-help">
-                1=低 / 3=普通 / 5=最重要
+                ※ 任意入力です。タスク一覧にも短く表示されます
             </div>
         </div>
 
-        {{-- 緊急 --}}
-        <div class="tk-form__group">
-            <label class="tk-label">緊急</label>
-            <label class="tk-check">
-                <input type="hidden" name="is_urgent" value="0">
-                <input type="checkbox" name="is_urgent" value="1" {{ old('is_urgent')?'checked':'' }}>
-                <span>急ぎ（優先して片付けたい）</span>
-            </label>
+        <div class="tk-form-grid tk-form-grid--meta">
+            {{-- カテゴリ --}}
+            <div class="tk-form__group">
+                <label class="tk-label" for="category">
+                    カテゴリ <span class="tk-required">*</span>
+                </label>
+                <select id="category" name="category" class="tk-select" required>
+                    <option value="work" {{ old('category','work')==='work'?'selected':'' }}>
+                        仕事・学校
+                    </option>
+                    <option value="private" {{ old('category')==='private'?'selected':'' }}>
+                        プライベート
+                    </option>
+                </select>
+            </div>
+
+            {{-- 期限 --}}
+            <div class="tk-form__group">
+                <label class="tk-label" for="due_date">期限</label>
+                <div class="tk-date-field">
+                    <input
+                        type="date"
+                        id="due_date"
+                        name="due_date"
+                        class="tk-input tk-date-input"
+                        min="{{ now()->toDateString() }}"
+                        value="{{ old('due_date') }}"
+                    >
+                    <button type="button" class="tk-date-button" data-date-picker-target="due_date">
+                        日付を選ぶ
+                    </button>
+                </div>
+            </div>
+
+            {{-- 重要度 --}}
+            <div class="tk-form__group">
+                <label class="tk-label" for="importance">
+                    重要度 <span class="tk-required">*</span>
+                </label>
+                <select id="importance" name="importance" class="tk-select" required>
+                    @for ($i = 1; $i <= 5; $i++)
+                        <option value="{{ $i }}" {{ (int)old('importance',3)===$i?'selected':'' }}>
+                            {{ $i }}
+                        </option>
+                    @endfor
+                </select>
+                <div class="tk-help">
+                    1=低 / 3=普通 / 5=最重要
+                </div>
+            </div>
+
+            {{-- 緊急 --}}
+            <div class="tk-form__group">
+                <label class="tk-label">緊急</label>
+                <label class="tk-check">
+                    <input type="hidden" name="is_urgent" value="0">
+                    <input type="checkbox" name="is_urgent" value="1" {{ old('is_urgent')?'checked':'' }}>
+                    <span>急ぎ（優先して片付けたい）</span>
+                </label>
+            </div>
         </div>
 
         <hr class="tk-hr">
@@ -151,6 +176,10 @@ $hasParent = !empty($parentTaskId);
 
             <div class="tk-section__title">
                 <div class="tk-section__ja">ステータス割り振り</div>
+            </div>
+
+            <div class="tk-help">
+                MVPでは合計0〜6ポイントの範囲で割り振ります。全て0でも登録できます。
             </div>
 
             <div class="tk-row tk-row--gap">
@@ -179,15 +208,32 @@ $hasParent = !empty($parentTaskId);
                             {{ $label }}
                         </label>
 
-                        <input
-                            type="number"
-                            id="stat_{{ $key }}"
-                            name="stat_{{ $key }}"
-                            class="tk-input"
-                            value="{{ old('stat_'.$key,0) }}"
-                            min="0"
-                            max="999"
-                        >
+                        @if ($key === 'strategy')
+                            <div class="tk-stat-input-with-side">
+                                <input
+                                    type="number"
+                                    id="stat_{{ $key }}"
+                                    name="stat_{{ $key }}"
+                                    class="tk-input"
+                                    value="{{ old('stat_'.$key,0) }}"
+                                    min="0"
+                                    max="6"
+                                >
+                                <span class="tk-stat-auto-bonus">
+                                    +{{ $autoStrategyOnCreate }}
+                                </span>
+                            </div>
+                        @else
+                            <input
+                                type="number"
+                                id="stat_{{ $key }}"
+                                name="stat_{{ $key }}"
+                                class="tk-input"
+                                value="{{ old('stat_'.$key,0) }}"
+                                min="0"
+                                max="6"
+                            >
+                        @endif
                     </div>
 
                 @endforeach
@@ -210,9 +256,10 @@ $hasParent = !empty($parentTaskId);
 
     </form>
 </div>
+</div>
 @endsection
 
-@section('js')
+@section('scripts')
 <script>
 (function() {
     const category = document.getElementById('category');
@@ -226,6 +273,20 @@ $hasParent = !empty($parentTaskId);
 
     const btnRecommend = document.getElementById('btnRecommend');
     const btnClearStats = document.getElementById('btnClearStats');
+
+    document.querySelectorAll('[data-date-picker-target]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const input = document.getElementById(button.dataset.datePickerTarget);
+            if (!input) return;
+
+            if (typeof input.showPicker === 'function') {
+                input.showPicker();
+                return;
+            }
+
+            input.focus();
+        });
+    });
 
     function setStats(p, s, f, a, l, st) {
         statPatience.value = p;

@@ -22,6 +22,7 @@ if (taskKillEl) {
         // Blade 側から渡されたタスクデータと実行 URL を取得
         const tasks = JSON.parse(taskKillEl.dataset.tasks || '[]');
         const executeUrl = taskKillEl.dataset.executeUrl || null;
+        const taskkillSeVolume = Number.parseInt(taskKillEl.dataset.taskkillSeVolume || '50', 10);
 
         const root = ReactDOM.createRoot(taskKillEl);
 
@@ -29,6 +30,7 @@ if (taskKillEl) {
                 <TaskKill
                     tasks={tasks}
                     executeUrl={executeUrl}
+                    taskkillSeVolume={taskkillSeVolume}
                 />
         );
 
@@ -47,6 +49,8 @@ if (resultEl) {
         // Blade 側から渡されたログと合計値データを取得
         const logs = JSON.parse(resultEl.dataset.logs || '[]');
         const total = JSON.parse(resultEl.dataset.total || '{}');
+        const tasksUrl = resultEl.dataset.tasksUrl || '/tasks';
+        const recordUrl = resultEl.dataset.recordUrl || '/record';
 
         const root = ReactDOM.createRoot(resultEl);
 
@@ -55,6 +59,8 @@ if (resultEl) {
                 <TaskKillResult
                     logs={logs}
                     total={total}
+                    tasksUrl={tasksUrl}
+                    recordUrl={recordUrl}
                 />
             </React.StrictMode>
         );

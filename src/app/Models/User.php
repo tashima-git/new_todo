@@ -84,4 +84,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCustomMessage::class);
     }
+
+    public function setting()
+    {
+        return $this->hasOne(UserSetting::class);
+    }
 }

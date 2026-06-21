@@ -22,7 +22,7 @@
     </div>
 
     <!-- 開発用タスク生成ボタン -->
-    <form method="POST" action="/dev/generate">
+    <form method="POST" action="{{ route('dev.generate') }}">
         @csrf
         <button type="submit">テストタスク生成</button>
     </form>
@@ -51,23 +51,25 @@
             <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
             <input type="hidden" name="view" value="{{ request('view', 'tree') }}">
 
-            <div class="filter-item">
-                <label>カテゴリ</label>
-                <select name="category">
-                    <option value="">すべて</option>
-                    <option value="work" {{ request('category') === 'work' ? 'selected' : '' }}>仕事・学校</option>
-                    <option value="private" {{ request('category') === 'private' ? 'selected' : '' }}>プライベート</option>
-                </select>
-            </div>
+            <div class="filter-fields">
+                <div class="filter-item">
+                    <label>カテゴリ</label>
+                    <select name="category">
+                        <option value="">すべて</option>
+                        <option value="work" {{ request('category') === 'work' ? 'selected' : '' }}>仕事・学校</option>
+                        <option value="private" {{ request('category') === 'private' ? 'selected' : '' }}>プライベート</option>
+                    </select>
+                </div>
 
-            <div class="filter-item">
-                <label>ボス種別</label>
-                <select name="boss_type">
-                    <option value="">すべて</option>
-                    <option value="mob" {{ request('boss_type') === 'mob' ? 'selected' : '' }}>雑魚</option>
-                    <option value="mid" {{ request('boss_type') === 'mid' ? 'selected' : '' }}>中ボス</option>
-                    <option value="boss" {{ request('boss_type') === 'boss' ? 'selected' : '' }}>大ボス</option>
-                </select>
+                <div class="filter-item">
+                    <label>敵ランク</label>
+                    <select name="boss_type">
+                        <option value="">すべて</option>
+                        <option value="mob" {{ request('boss_type') === 'mob' ? 'selected' : '' }}>雑魚</option>
+                        <option value="mid" {{ request('boss_type') === 'mid' ? 'selected' : '' }}>中ボス</option>
+                        <option value="boss" {{ request('boss_type') === 'boss' ? 'selected' : '' }}>大ボス</option>
+                    </select>
+                </div>
             </div>
 
             <div class="filter-actions">
@@ -79,8 +81,25 @@
                 class="btn-reset">
                     リセット
                 </a>
+
+                <label class="filter-check">
+                    <input
+                        type="checkbox"
+                        name="urgent_only"
+                        value="1"
+                        {{ $urgentOnly ? 'checked' : '' }}
+                        onchange="this.form.submit()"
+                    >
+                    <span>急ぎのみ</span>
+                </label>
             </div>
         </form>
+
+        @if ($urgentOnly)
+            <div class="filter-status">
+                急ぎのみ表示中
+            </div>
+        @endif
     </div>
 
         {{-- ===============================
@@ -125,6 +144,16 @@
         =============================== --}}
         <div class="tasks-table-wrapper">
             <table class="tasks-table">
+                <colgroup>
+                    <col class="tasks-col-check">
+                    <col class="tasks-col-title">
+                    <col class="tasks-col-category">
+                    <col class="tasks-col-due">
+                    <col class="tasks-col-importance">
+                    <col class="tasks-col-urgent">
+                    <col class="tasks-col-rank">
+                    <col class="tasks-col-actions">
+                </colgroup>
                 <thead>
                     <tr>
                         <th><input type="checkbox" id="checkAll"></th>
@@ -133,7 +162,7 @@
                         <th>期限</th>
                         <th>重要度</th>
                         <th>緊急</th>
-                        <th>ボス</th>
+                        <th>敵ランク</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -159,13 +188,11 @@
     @else
 
         @if($status === 'pending')
-            @if(is_null($task->parent_task_id))
-                @include('tasks.partials.task-row', [
-                    'task' => $task,
-                    'level' => 0,
-                    'parentId' => null
-                ])
-            @endif
+            @include('tasks.partials.task-row', [
+                'task' => $task,
+                'level' => 0,
+                'parentId' => null
+            ])
         @else
             @include('tasks.partials.task-row', [
                 'task' => $task,
@@ -192,6 +219,26 @@
 
     </form>
 
+</div>
+
+<div class="task-confirm-modal" id="completeChildrenModal" aria-hidden="true" hidden>
+    <div class="task-confirm-modal__backdrop" data-modal-cancel></div>
+    <div class="task-confirm-modal__panel" role="dialog" aria-modal="true" aria-labelledby="completeChildrenModalTitle">
+        <div class="task-confirm-modal__title" id="completeChildrenModalTitle">
+            子タスクも完了しますか？
+        </div>
+        <div class="task-confirm-modal__body">
+            このタスクには未完了の子タスクがあります。親タスクを完了すると、配下の子タスクもまとめて完了扱いになります。
+        </div>
+        <div class="task-confirm-modal__actions">
+            <button type="button" class="task-confirm-modal__cancel" data-modal-cancel>
+                取消
+            </button>
+            <button type="button" class="task-confirm-modal__complete" id="confirmCompleteChildren">
+                完了
+            </button>
+        </div>
+    </div>
 </div>
 @endsection
 

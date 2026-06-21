@@ -22,6 +22,28 @@
     align-items: center;
 }
 
+.tk-kill-screen {
+    position: relative;
+    width: min(900px, 94vw);
+    text-align: center;
+}
+
+.tk-kill-bulk-action {
+    margin-top: 100px;
+}
+
+.tk-kill-bulk-btn {
+    padding: 10px 18px;
+    border: 1px solid #fff;
+    background: var(--bg-sub);
+    color: #fff;
+    cursor: pointer;
+}
+
+.tk-kill-bulk-btn:hover {
+    background: var(--bg-main);
+}
+
 
 /* ===============================
    カード本体
@@ -32,6 +54,8 @@
     position: relative;
 
     width: min(420px, 92vw);
+
+    margin: 0 auto;
 
     padding: 40px;
 
@@ -68,8 +92,16 @@
 
 /* ボタン */
 
-.tk-kill-btn {
+.tk-kill-btn,
+.tk-kill-bulk-btn {
 
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    isolation: isolate;
+}
+
+.tk-kill-btn {
     margin-top: 28px;
 
     padding: 10px 28px;
@@ -81,6 +113,30 @@
     color: #fff;
 
     cursor: pointer;
+}
+
+.tk-kill-btn::before,
+.tk-kill-bulk-btn::before,
+.tk-kill-bulk-btn::after {
+    content: "";
+    position: absolute;
+    inset: -18px -10px;
+    background-image: url("/images/taskkill/nihontou2_tachi.png");
+    background-repeat: no-repeat;
+    background-position: center calc(50% - -3px);
+    background-size: 132px auto;
+    opacity: 0.18;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+}
+
+.tk-kill-btn::before,
+.tk-kill-bulk-btn::before {
+    transform: rotate(28deg) scale(-1, -1);
+}
+
+.tk-kill-bulk-btn::after {
+    transform: rotate(-28deg) scale(1, -1);
 }
 
 .tk-kill-btn:hover {
@@ -100,23 +156,25 @@
     top: 50%;
     left: 50%;
 
-    width: 140%;
-    height: 5px;
+    width: 145%;
+    height: 4px;
 
     background: linear-gradient(90deg,
             rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 1) 45%,
-            rgba(255, 255, 255, 1) 55%,
+            rgba(255, 255, 255, .4) 36%,
+            rgba(255, 255, 255, 1) 50%,
+            rgba(255, 255, 255, .4) 64%,
             rgba(255, 255, 255, 0) 100%);
 
     transform:
-        translate(-50%, -50%) rotate(-20deg) scaleX(.5);
+        translate(-50%, -50%) rotate(-20deg);
 
     transform-origin: center;
+    clip-path: inset(0 0 0 100%);
 
     pointer-events: none;
 
-    animation: slash .18s ease-out forwards;
+    animation: slash .32s ease-out forwards;
 }
 
 
@@ -125,25 +183,64 @@
     0% {
 
         opacity: 0;
+        clip-path: inset(0 0 0 100%);
 
         transform:
-            translate(-50%, -50%) rotate(-20deg) scaleX(.2);
+            translate(-50%, -50%) rotate(-20deg);
     }
 
-    30% {
+    68% {
 
         opacity: 1;
+        clip-path: inset(0 0 0 0);
 
         transform:
-            translate(-50%, -50%) rotate(-20deg) scaleX(1.1);
+            translate(-50%, -50%) rotate(-20deg);
     }
 
     100% {
 
         opacity: 0;
+        clip-path: inset(0 0 0 0);
 
         transform:
-            translate(-50%, -50%) rotate(-20deg) scaleX(1.2);
+            translate(-50%, -50%) rotate(-20deg);
+    }
+}
+
+.tk-slash--mirror {
+    transform:
+        translate(-50%, -50%) rotate(20deg);
+    animation: slashMirror .52s ease-out forwards;
+}
+
+@keyframes slashMirror {
+
+    0% {
+
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+
+        transform:
+            translate(-50%, -50%) rotate(20deg);
+    }
+
+    68% {
+
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+
+        transform:
+            translate(-50%, -50%) rotate(20deg);
+    }
+
+    100% {
+
+        opacity: 0;
+        clip-path: inset(0 0 0 0);
+
+        transform:
+            translate(-50%, -50%) rotate(20deg);
     }
 }
 
@@ -283,10 +380,46 @@
     animation: splitTop .25s ease forwards;
 }
 
+.tk-kill-card.bulk-cut .tk-card-layer.top.cut {
+
+    animation: splitTopBulk .48s ease forwards;
+}
+
 
 .tk-card-layer.bottom.cut {
 
     animation: splitBottom .25s ease forwards;
+}
+
+.tk-kill-card.bulk-cut .tk-card-layer.bottom.cut {
+
+    animation: splitBottomBulk .48s ease forwards;
+}
+
+.tk-kill-card.bulk-cut::before,
+.tk-kill-card.bulk-cut::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 5;
+    width: 150%;
+    height: 2px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, .7) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    opacity: 0;
+    animation: crossCutFlash .48s ease forwards;
+}
+
+.tk-kill-card.bulk-cut::before {
+    transform: translate(-50%, -50%) rotate(-20deg);
+}
+
+.tk-kill-card.bulk-cut::after {
+    transform: translate(-50%, -50%) rotate(20deg);
 }
 
 
@@ -319,6 +452,54 @@
         transform:
 
             translate(36px, -20px) rotate(6deg);
+    }
+}
+
+@keyframes splitTopBulk {
+
+    0% {
+        transform:
+            translate(0, 0) rotate(0);
+        filter: brightness(1);
+    }
+
+    100% {
+        transform:
+            translate(-54px, -34px) rotate(-18deg);
+        filter: brightness(1.15);
+    }
+}
+
+@keyframes splitBottomBulk {
+
+    0% {
+        transform:
+            translate(0, 0) rotate(0);
+        filter: brightness(1);
+    }
+
+    100% {
+        transform:
+            translate(54px, 34px) rotate(18deg);
+        filter: brightness(1.15);
+    }
+}
+
+@keyframes crossCutFlash {
+
+    0% {
+        opacity: 0;
+        clip-path: inset(0 50% 0 50%);
+    }
+
+    55% {
+        opacity: .8;
+        clip-path: inset(0 0 0 0);
+    }
+
+    100% {
+        opacity: 0;
+        clip-path: inset(0 0 0 0);
     }
 }
 
@@ -360,4 +541,308 @@
     background: rgba(255, 255, 255, .45);
 
     transform: rotate(-1deg);
+}
+
+/* ===============================
+   討伐結果画面
+=============================== */
+
+#taskkill-result-root {
+    width: min(980px, 94vw);
+    margin: 42px auto 80px;
+}
+
+.tk-result-screen {
+    color: #f1f1f1;
+    letter-spacing: 0.08em;
+}
+
+.tk-result-title-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    padding: 14px 18px;
+    border: 2px solid #efefef;
+    border-radius: 4px;
+    background:
+        linear-gradient(90deg, transparent 0 8px, rgba(255, 255, 255, 0.08) 8px 9px, transparent 9px),
+        var(--bg-sub);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+.tk-result-title-frame h1 {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: bold;
+    line-height: 1;
+}
+
+.tk-result-title-mark {
+    opacity: 0.85;
+    font-size: 20px;
+}
+
+.tk-result-panel {
+    margin-top: 14px;
+    padding: 26px 26px 30px;
+    border: 2px solid #efefef;
+    border-radius: 4px;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 34%),
+        var(--bg-sub);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+        0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.tk-result-complete {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.tk-result-swords {
+    position: relative;
+    width: 78px;
+    height: 42px;
+    opacity: 0.82;
+}
+
+.tk-result-swords::before,
+.tk-result-swords::after {
+    content: "";
+    position: absolute;
+    inset: -10px -18px;
+    background-image: url("/images/taskkill/nihontou2_tachi.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 92px auto;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+    transform-origin: center;
+}
+
+.tk-result-swords::before {
+    transform: rotate(28deg) scale(-1, -1);
+}
+
+.tk-result-swords::after {
+    transform: rotate(-28deg) scale(1, -1);
+}
+
+.tk-result-complete-text {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+.tk-result-slash-line {
+    width: min(320px, 70%);
+    height: 4px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.16) 15%,
+        rgba(255, 255, 255, 0.95) 50%,
+        rgba(255, 255, 255, 0.16) 85%,
+        transparent 100%);
+    transform: skewX(-28deg);
+}
+
+.tk-result-count-box {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 18px;
+    width: min(360px, 100%);
+    margin: 20px auto 0;
+    padding: 9px 18px;
+    border: 2px solid #efefef;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.tk-result-count-box strong {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.tk-result-section-label,
+.tk-result-log-heading {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0 12px;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.tk-result-section-label::before,
+.tk-result-section-label::after,
+.tk-result-log-heading::before,
+.tk-result-log-heading::after {
+    content: "";
+    flex: 1;
+    max-width: 220px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.tk-result-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.tk-result-stat-card {
+    display: flex;
+    min-height: 74px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 2px solid #efefef;
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.tk-result-stat-label {
+    font-size: 13px;
+    opacity: 0.86;
+}
+
+.tk-result-stat-value {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.tk-result-log-table {
+    overflow: hidden;
+    border: 2px solid #efefef;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.tk-result-log-table.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tk-result-log-row {
+    display: grid;
+    grid-template-columns: 92px minmax(180px, 1fr) 120px 180px;
+    align-items: center;
+    gap: 12px;
+    min-height: 38px;
+    padding: 6px 12px;
+    border-top: 1px dotted rgba(255, 255, 255, 0.34);
+    font-size: 13px;
+}
+
+.tk-result-log-row:first-child {
+    border-top: 0;
+}
+
+.tk-result-log-row--head {
+    min-height: 34px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 12px;
+}
+
+.tk-result-status-badge,
+.tk-result-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    padding: 3px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.82);
+    background: rgba(0, 0, 0, 0.18);
+    line-height: 1.2;
+}
+
+.tk-result-type-badge {
+    min-width: 78px;
+}
+
+.tk-result-task-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tk-result-date {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.88;
+}
+
+.tk-result-empty-log {
+    padding: 18px;
+    text-align: center;
+    opacity: 0.72;
+}
+
+.tk-result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 26px;
+}
+
+.tk-result-button {
+    min-width: 230px;
+    padding: 12px 18px;
+    border: 2px solid #efefef;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.22);
+    color: #f1f1f1;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.tk-result-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 780px) {
+    #taskkill-result-root {
+        margin-top: 24px;
+    }
+
+    .tk-result-panel {
+        padding: 20px 14px 24px;
+    }
+
+    .tk-result-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tk-result-log-row,
+    .tk-result-log-row--head {
+        grid-template-columns: 78px minmax(120px, 1fr);
+    }
+
+    .tk-result-log-row > span:nth-child(3),
+    .tk-result-log-row > span:nth-child(4) {
+        grid-column: 2;
+    }
+
+    .tk-result-log-row--head > span:nth-child(3),
+    .tk-result-log-row--head > span:nth-child(4) {
+        display: none;
+    }
+
+    .tk-result-actions {
+        gap: 12px;
+    }
+
+    .tk-result-button {
+        width: 100%;
+        min-width: 0;
+    }
 }

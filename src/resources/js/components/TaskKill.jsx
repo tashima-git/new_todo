@@ -1,28 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function TaskKill({ tasks = [], executeUrl }) {
+export default function TaskKill({ tasks = [], executeUrl, taskkillSeVolume = 50 }) {
 
     const [index, setIndex] = useState(0);
     const [isCutting, setIsCutting] = useState(false);
+    const [isBulkCutting, setIsBulkCutting] = useState(false);
+    const [isExecuting, setIsExecuting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const indexRef = useRef(0);
     const holdingRef = useRef(false);
     const runningRef = useRef(false);
     const mountedRef = useRef(true);
+    const executedRef = useRef(false);
 
     // ★ SE
     const slashAudioRef = useRef(null);
+    const layeredSlashAudioRef = useRef(null);
 
     const currentTask = tasks[index] ?? null;
 
     // =========================
     // API
     // =========================
-    const executeKill = async (task) => {
+    const executeAllKills = async () => {
 
-        if (!task) return false;
+        if (executedRef.current) return true;
+        if (tasks.length === 0) return false;
 
         try {
+            setIsExecuting(true);
+            setErrorMessage("");
 
             const response = await fetch(executeUrl, {
                 method: "POST",
@@ -33,26 +41,32 @@ export default function TaskKill({ tasks = [], executeUrl }) {
                         ?.getAttribute("content"),
                 },
                 body: JSON.stringify({
-                    task_id: task.id,
+                    task_ids: tasks.map(task => task.id),
                 }),
             });
 
             if (!response.ok) {
                 console.error("HTTP ERROR:", response.status);
+                setErrorMessage("討伐処理に失敗しました。画面を更新してもう一度試してください。");
                 return false;
             }
 
             const data = await response.json();
 
             if (!data.success) {
+                setErrorMessage("討伐処理に失敗しました。画面を更新してもう一度試してください。");
                 return false;
             }
 
+            executedRef.current = true;
             return true;
 
         } catch (e) {
             console.error("Fetch error:", e);
+            setErrorMessage("通信に失敗しました。ネットワーク状態を確認してください。");
             return false;
+        } finally {
+            setIsExecuting(false);
         }
     };
 
@@ -62,18 +76,19 @@ export default function TaskKill({ tasks = [], executeUrl }) {
     useEffect(() => {
 
         slashAudioRef.current = new Audio("/sounds/slash.mp3");
+        layeredSlashAudioRef.current = new Audio("/sounds/slash.mp3");
 
-        // 音量調整
-        slashAudioRef.current.volume = 0.6;
+        const volume = Number.isFinite(taskkillSeVolume) ? taskkillSeVolume : 50;
+        const normalizedVolume = Math.min(Math.max(volume, 0), 100) / 100;
+        slashAudioRef.current.volume = normalizedVolume;
+        layeredSlashAudioRef.current.volume = normalizedVolume;
 
-    }, []);
+    }, [taskkillSeVolume]);
 
     // =========================
     // SE 再生
     // =========================
-    const playSlash = () => {
-
-        const audio = slashAudioRef.current;
+    const playSlash = (audio = slashAudioRef.current) => {
 
         if (!audio) return;
 
@@ -95,6 +110,14 @@ export default function TaskKill({ tasks = [], executeUrl }) {
         audio.play().catch(() => {});
     };
 
+    const playLayeredSlash = () => {
+        playSlash(slashAudioRef.current);
+
+        window.setTimeout(() => {
+            playSlash(layeredSlashAudioRef.current);
+        }, 90);
+    };
+
     // =========================
     // 1タスク討伐
     // =========================
@@ -108,7 +131,15 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
         runningRef.current = true;
 
+        const executed = await executeAllKills();
+
+        if (!executed) {
+            runningRef.current = false;
+            return;
+        }
+
         // 斬撃開始
+        setIsBulkCutting(false);
         setIsCutting(true);
 
         // ★ SE再生
@@ -117,25 +148,20 @@ export default function TaskKill({ tasks = [], executeUrl }) {
         // debug
         console.log("cut start");
 
-        const success = await executeKill(task);
+        // エフェクトを見せる時間
+        await new Promise(r => setTimeout(r, 250));
 
-        if (success) {
+        const nextIndex = indexRef.current + 1;
 
-            // エフェクトを見せる時間
-            await new Promise(r => setTimeout(r, 250));
+        indexRef.current = nextIndex;
+        setIndex(nextIndex);
 
-            const nextIndex = indexRef.current + 1;
+        if (nextIndex >= tasks.length) {
 
-            indexRef.current = nextIndex;
-            setIndex(nextIndex);
+            await new Promise(r => setTimeout(r, 200));
 
-            if (nextIndex >= tasks.length) {
-
-                await new Promise(r => setTimeout(r, 200));
-
-                window.location.href = "/taskkill/result";
-                return;
-            }
+            window.location.href = "/taskkill/result";
+            return;
         }
 
         setIsCutting(false);
@@ -177,6 +203,41 @@ export default function TaskKill({ tasks = [], executeUrl }) {
         holdingRef.current = false;
     };
 
+    const waitForNextFrame = () => new Promise(resolve => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(resolve);
+        });
+    });
+
+    const skipToResult = async () => {
+
+        if (runningRef.current) return;
+
+        runningRef.current = true;
+        holdingRef.current = false;
+
+        const executed = await executeAllKills();
+
+        if (executed) {
+            setIsCutting(false);
+            setIsBulkCutting(false);
+            await waitForNextFrame();
+
+            setIsBulkCutting(true);
+            setIsCutting(true);
+            await waitForNextFrame();
+
+            playLayeredSlash();
+
+            await new Promise(r => setTimeout(r, 720));
+
+            window.location.href = "/taskkill/result";
+            return;
+        }
+
+        runningRef.current = false;
+    };
+
     // =========================
     // cleanup
     // =========================
@@ -192,6 +253,11 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
                 slashAudioRef.current.pause();
                 slashAudioRef.current = null;
+            }
+
+            if (layeredSlashAudioRef.current) {
+                layeredSlashAudioRef.current.pause();
+                layeredSlashAudioRef.current = null;
             }
         };
 
@@ -211,9 +277,9 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
     return (
 
-        <div style={{ textAlign: "center" }}>
+        <div className="tk-kill-screen">
 
-            <div className="tk-kill-card">
+            <div className={`tk-kill-card ${isBulkCutting ? "bulk-cut" : ""}`}>
 
                 {/* 上パーツ */}
                 <div className={`tk-card-layer top ${isCutting ? "cut" : ""}`}>
@@ -243,12 +309,14 @@ export default function TaskKill({ tasks = [], executeUrl }) {
 
                 {/* 斬撃エフェクト */}
                 {isCutting && <div className="tk-slash" />}
+                {isCutting && isBulkCutting && <div className="tk-slash tk-slash--mirror" />}
 
             </div>
 
             {/* 討伐ボタン */}
             <button
                 className="tk-kill-btn"
+                disabled={isExecuting}
                 onMouseDown={startRapid}
                 onMouseUp={stopRapid}
                 onMouseLeave={stopRapid}
@@ -260,8 +328,25 @@ export default function TaskKill({ tasks = [], executeUrl }) {
                     }
                 }}
             >
-                討伐
+                {isExecuting ? "討伐準備中..." : "討伐"}
             </button>
+
+            <div className="tk-kill-bulk-action">
+                <button
+                    type="button"
+                    className="tk-kill-bulk-btn"
+                    disabled={isExecuting}
+                    onClick={skipToResult}
+                >
+                    {isExecuting ? "討伐準備中..." : "まとめて討伐"}
+                </button>
+            </div>
+
+            {errorMessage && (
+                <div style={{ color: "#b91c1c", marginTop: "16px" }}>
+                    {errorMessage}
+                </div>
+            )}
 
         </div>
     );

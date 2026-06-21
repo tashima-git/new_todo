@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const statLabels = {
     patience: '忍耐',
@@ -15,7 +15,12 @@ const bossTypeLabels = {
     boss: '大ボス',
 };
 
-export default function TaskKillResult({ logs = [], total = {} }) {
+export default function TaskKillResult({
+    logs = [],
+    total = {},
+    tasksUrl = '/tasks',
+    recordUrl = '/record',
+}) {
 
     // =============================
     // 安全なデータ生成
@@ -27,6 +32,29 @@ export default function TaskKillResult({ logs = [], total = {} }) {
         : [];
 
     const safeTotal = total ?? {};
+    const defeatedCount = safeLogs.length;
+
+    const formattedLogs = useMemo(() => {
+        return safeLogs.map((log, index) => {
+            const dateSource = log?.task_completed_at ?? log?.created_at ?? null;
+            const date = dateSource ? new Date(dateSource) : null;
+
+            return {
+                id: log?.id ?? `log-${index}`,
+                title: log?.task_title ?? '-',
+                bossType: bossTypeLabels[log?.boss_type] ?? '不明',
+                defeatedAt: date && !Number.isNaN(date.getTime())
+                    ? date.toLocaleString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    })
+                    : '-',
+            };
+        });
+    }, [safeLogs]);
 
     // =============================
     // state
@@ -122,128 +150,82 @@ export default function TaskKillResult({ logs = [], total = {} }) {
     // =============================
     return (
 
-        <div className="space-y-6">
+        <div className="tk-result-screen">
+            <header className="tk-result-title-frame">
+                <span className="tk-result-title-mark">◇</span>
+                <h1>討伐結果</h1>
+                <span className="tk-result-title-mark">◇</span>
+            </header>
 
-            <div>
-                <h1 className="text-2xl font-bold">
-                    討伐結果
-                </h1>
-
-                <p className="text-sm text-gray-600 mt-1">
-                    今日の討伐が完了しました。ステータスが上昇しています。
-                </p>
-            </div>
-
-            {/* =============================
-                獲得ステータス
-            ============================= */}
-
-            <div className="rounded border bg-white p-4">
-
-                <div className="font-bold mb-3">
-                    今回の獲得ステータス
+            <section className="tk-result-panel">
+                <div className="tk-result-complete">
+                    <div className="tk-result-swords" aria-hidden="true" />
+                    <div className="tk-result-complete-text">討伐完了</div>
+                    <div className="tk-result-slash-line" aria-hidden="true" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="tk-result-count-box">
+                    <span>討伐数</span>
+                    <strong>{defeatedCount}</strong>
+                    <span>体</span>
+                </div>
 
+                <div className="tk-result-section-label">
+                    <span>獲得ステータス</span>
+                </div>
+
+                <div className="tk-result-stats-grid">
                     {Object.entries(statLabels).map(([key, label]) => (
-
-                        <div
-                            key={key}
-                            className="flex items-center justify-between border rounded px-3 py-2"
-                        >
-                            <span>{label}</span>
-
-                            <span className="font-bold">
+                        <div className="tk-result-stat-card" key={key}>
+                            <span className="tk-result-stat-label">{label}</span>
+                            <strong className="tk-result-stat-value">
                                 +{displayStats[key]}
-                            </span>
-
+                            </strong>
                         </div>
-
                     ))}
-
                 </div>
 
-            </div>
-
-            {/* =============================
-                討伐ログ
-            ============================= */}
-
-            <div className="rounded border bg-white p-4">
-
-                <div className="flex items-center justify-between mb-3">
-
-                    <div className="font-bold">
-                        討伐した敵
-                    </div>
-
-                    <div className="text-sm text-gray-600">
-                        {safeLogs.length}体
-                    </div>
-
+                <div className="tk-result-log-heading">
+                    <span>今回の討伐</span>
                 </div>
 
-                {safeLogs.length === 0 && (
-                    <div className="text-sm text-gray-600">
-                        討伐ログがありません。
+                <div className={`tk-result-log-table ${showLogs ? 'is-visible' : ''}`}>
+                    <div className="tk-result-log-row tk-result-log-row--head">
+                        <span>状態</span>
+                        <span>タスク名</span>
+                        <span>ボス種別</span>
+                        <span>討伐日時</span>
                     </div>
-                )}
 
-                <div className="space-y-3">
+                    {formattedLogs.length === 0 && (
+                        <div className="tk-result-empty-log">
+                            討伐ログがありません。
+                        </div>
+                    )}
 
-                    {safeLogs.map((log, i) => {
-
-                        if (!log) return null;
-
-                        const date = log.task_completed_at
-                            ? new Date(log.task_completed_at)
-                            : null;
-
-                        return (
-
-                            <div
-                                key={`taskkill-log-${log.id ?? i}`}
-                                className={`
-                                    rounded border p-3 bg-white
-                                    transition-opacity duration-500
-                                    ${showLogs ? "opacity-100" : "opacity-0"}
-                                `}
-                            >
-
-                                <div className="font-bold">
-
-                                    <span className="ml-2 text-sm text-gray-600">
-                                        {bossTypeLabels[log.boss_type] ?? '不明'}
-                                    </span>
-
-                                </div>
-
-                                <div className="text-sm mt-1">
-                                    タスク名：{log.task_title ?? '-'}
-                                </div>
-
-                                <div className="text-xs text-gray-500 mt-1">
-
-                                    討伐日時：
-
-                                    {date
-                                        ? date.toLocaleString('ja-JP')
-                                        : '-'
-                                    }
-
-                                </div>
-
-                            </div>
-
-                        );
-
-                    })}
-
+                    {formattedLogs.map(log => (
+                        <div className="tk-result-log-row" key={log.id}>
+                            <span>
+                                <span className="tk-result-status-badge">討伐済</span>
+                            </span>
+                            <span className="tk-result-task-title">{log.title}</span>
+                            <span>
+                                <span className="tk-result-type-badge">{log.bossType}</span>
+                            </span>
+                            <span className="tk-result-date">{log.defeatedAt}</span>
+                        </div>
+                    ))}
                 </div>
 
-            </div>
-
+                <div className="tk-result-actions">
+                    <a className="tk-result-button" href={tasksUrl}>
+                        ▶ タスク一覧へ戻る
+                    </a>
+                    <a className="tk-result-button" href={recordUrl}>
+                        ▶ 戦績を見る
+                    </a>
+                </div>
+            </section>
         </div>
     );
 }

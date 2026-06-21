@@ -15,9 +15,9 @@ class ExecuteTaskKillRequest extends FormRequest
 
     public function rules(): array
     {
-        // 今回は入力値なしだが、将来拡張用に空で定義
         return [
-            // 例: 'confirm' => ['required', 'boolean'],
+            'task_ids' => ['required', 'array', 'min:1'],
+            'task_ids.*' => ['integer'],
         ];
     }
 

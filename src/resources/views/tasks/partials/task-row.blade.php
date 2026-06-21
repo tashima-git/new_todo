@@ -2,6 +2,7 @@
     $statusValue = $task->status->value;
     $bossType = $task->boss_type->value;
     $hasChildren = $task->childTasks->count() > 0;
+    $hasPendingChildren = $task->childTasks->contains(fn ($child) => $child->status->value === 'pending');
     $canHaveChildren = in_array($bossType, ['mid', 'boss'], true);
 
     // ★ 追加：表示モード
@@ -33,7 +34,22 @@
             </button>
         @endif
 
-        {{ $task->title }}
+        <div class="task-title-wrap">
+            <span class="task-title {{ filled($task->memo) ? 'has-memo' : '' }}" tabindex="{{ filled($task->memo) ? '0' : '-1' }}">
+                {{ $task->title }}
+            </span>
+
+            @if(filled($task->memo))
+                <span class="task-memo-mark" aria-label="メモあり" title="メモあり"></span>
+
+                <div class="task-memo-tooltip" role="tooltip">
+                    <div class="task-memo-tooltip__label">タスク名</div>
+                    <div class="task-memo-tooltip__title">{{ $task->title }}</div>
+                    <div class="task-memo-tooltip__label">内容</div>
+                    <div class="task-memo-tooltip__body">{{ $task->memo }}</div>
+                </div>
+            @endif
+        </div>
     </td>
 
     <td>
@@ -71,7 +87,8 @@
 
                 <button type="button"
                     class="btn-complete"
-                    data-url="{{ route('tasks.complete', $task) }}">
+                    data-url="{{ route('tasks.complete', $task) }}"
+                    data-has-pending-children="{{ $hasPendingChildren ? '1' : '0' }}">
                     完了
                 </button>
 

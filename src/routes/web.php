@@ -8,6 +8,8 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\HelpController;
+use App\Http\Controllers\DevToolController;
+use App\Http\Controllers\SettingsController;
 
 // -------------------------------
 // TOP（ログイン必須にするなら auth を付ける）
@@ -36,7 +38,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create', [TaskController::class, 'create'])->name('create');
         Route::post('/', [TaskController::class, 'store'])->name('store');
 
-        Route::get('/{task}', [TaskController::class, 'show'])->name('show');
         Route::get('/{task}/edit', [TaskController::class, 'edit'])->name('edit');
         Route::put('/{task}', [TaskController::class, 'update'])->name('update');
 
@@ -74,9 +75,15 @@ Route::middleware(['auth'])->group(function () {
     // -------------------------------
     Route::get('/plan', [PlanController::class, 'index'])->name('plan.index');
     Route::post('/plan', [PlanController::class, 'update'])->name('plan.update');
+
+    // -------------------------------
+    // Settings
+    // -------------------------------
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings/email', [SettingsController::class, 'email'])->name('settings.email');
+    Route::get('/settings/password', [SettingsController::class, 'password'])->name('settings.password');
+
+    // 開発用タスク生成ボタン
+    Route::post('/dev/generate', [DevToolController::class, 'generateTasks'])->name('dev.generate');
 });
-
-
-// 開発用タスク生成ボタン
-use App\Http\Controllers\DevToolController;
-Route::post('/dev/generate', [DevToolController::class, 'generateTasks']);

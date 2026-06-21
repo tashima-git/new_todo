@@ -288,7 +288,8 @@ foreach($stats as $s){
 document.addEventListener("DOMContentLoaded", () => {
 
     const audio = new Audio("/sounds/status.mp3");
-    audio.volume = 0.3;
+    const statusSeVolume = Number.parseInt(document.body.dataset.statusSeVolume || "50", 10);
+    audio.volume = Math.min(Math.max(statusSeVolume, 0), 100) / 100;
 
     audio.play().catch(() => {
     });
