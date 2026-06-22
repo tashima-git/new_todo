@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ExecuteTaskKillRequest;
 use App\Enums\TaskStatus;
+use App\Models\Chapter;
 use App\Models\Task;
 use App\Models\TaskKillLog;
 use Illuminate\Support\Facades\Auth;
@@ -102,6 +103,25 @@ class TaskKillController extends Controller
             $user->increment('total_accuracy', $gained['total_accuracy']);
             $user->increment('total_life', $gained['total_life']);
             $user->increment('total_strategy', $gained['total_strategy']);
+
+            $chapter = Chapter::where('user_id', $user->id)
+                ->whereNull('ended_at')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$chapter) {
+                $chapter = $user->chapters()->create([
+                    'title' => '未設定の旅',
+                    'started_at' => now(),
+                ]);
+            }
+
+            $chapter->increment('total_patience', $gained['total_patience']);
+            $chapter->increment('total_speed', $gained['total_speed']);
+            $chapter->increment('total_focus', $gained['total_focus']);
+            $chapter->increment('total_accuracy', $gained['total_accuracy']);
+            $chapter->increment('total_life', $gained['total_life']);
+            $chapter->increment('total_strategy', $gained['total_strategy']);
 
             session()->put('taskkill_log_ids', $logIds);
 

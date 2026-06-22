@@ -1,0 +1,243 @@
+.chapter-page {
+    max-width: 1060px;
+    margin: 0 auto;
+}
+
+.chapter-header {
+    margin-bottom: 22px;
+}
+
+.chapter-kicker {
+    color: var(--text-muted);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+}
+
+.chapter-header h1 {
+    margin: 4px 0 8px;
+    font-size: 30px;
+    letter-spacing: 3px;
+}
+
+.chapter-header p {
+    margin: 0;
+    color: var(--text-sub);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.chapter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.chapter-card {
+    margin-bottom: 18px;
+    padding: 18px;
+    border: 2px solid var(--border-main);
+    border-radius: 10px;
+    background: var(--bg-sub);
+}
+
+.chapter-card--wide {
+    grid-column: 1 / -1;
+}
+
+.chapter-card__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-sub);
+}
+
+.chapter-card h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+    letter-spacing: 0.08em;
+}
+
+.chapter-card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.chapter-badge {
+    align-self: flex-start;
+    padding: 3px 8px;
+    border: 1px solid var(--border-main);
+    border-radius: 999px;
+    color: var(--text-sub);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.chapter-title-panel {
+    padding: 18px;
+    border: 1px solid var(--text-main);
+    background: rgba(0, 0, 0, 0.24);
+    text-align: center;
+}
+
+.chapter-title-label {
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+}
+
+.chapter-title {
+    margin-top: 8px;
+    font-size: clamp(24px, 5vw, 40px);
+    letter-spacing: 0.08em;
+}
+
+.chapter-days {
+    margin-top: 10px;
+    color: var(--text-sub);
+    font-size: 13px;
+}
+
+.chapter-stat-grid,
+.chapter-mini-stat-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.chapter-stat-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    margin-top: 16px;
+}
+
+.chapter-mini-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chapter-stat,
+.chapter-mini-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    border: 1px solid var(--border-main);
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.chapter-stat span,
+.chapter-mini-stat span {
+    color: var(--text-sub);
+    font-size: 13px;
+}
+
+.chapter-stat strong,
+.chapter-mini-stat strong {
+    margin-top: 6px;
+    font-size: 26px;
+    line-height: 1;
+}
+
+.chapter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.chapter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.chapter-field span {
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.chapter-field input {
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background: #1c1c22;
+    color: var(--text-main);
+    font-size: 15px;
+}
+
+.chapter-field input:focus {
+    outline: none;
+    border-color: var(--text-main);
+}
+
+.chapter-button {
+    width: fit-content;
+    padding: 10px 18px;
+    border: 2px solid var(--text-main);
+    border-radius: 6px;
+    background: var(--bg-button);
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.chapter-button:hover {
+    background: linear-gradient(#686868, #242424);
+}
+
+.chapter-button--ghost {
+    background: transparent;
+}
+
+.chapter-empty {
+    padding: 18px;
+    border: 1px dashed var(--border-main);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.chapter-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chapter-history-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
+    gap: 14px;
+    padding: 12px;
+    border: 1px solid var(--border-main);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.chapter-history-row strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.chapter-history-row span {
+    color: var(--text-sub);
+    font-size: 12px;
+}
+
+.chapter-history-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+}
+
+@media (max-width: 760px) {
+    .chapter-grid,
+    .chapter-history-row {
+        grid-template-columns: 1fr;
+    }
+
+    .chapter-stat-grid,
+    .chapter-mini-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

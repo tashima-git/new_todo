@@ -131,6 +131,10 @@ foreach($stats as $s){
 
         <h1>ステータス</h1>
 
+        <a href="{{ route('chapters.index') }}" class="status-journey-link">
+            成長画面へ
+        </a>
+
     </section>
 
 

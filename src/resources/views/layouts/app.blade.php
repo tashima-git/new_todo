@@ -42,9 +42,9 @@
                     <span class="tk-nav__ja">討伐</span>
                 </a>
 
-                <a href="{{ route('status.index') }}" class="tk-nav__item js-nav-sound">
-                    <span class="tk-nav__en">Status</span>
-                    <span class="tk-nav__ja">ステータス</span>
+                <a href="{{ route('chapters.index') }}" class="tk-nav__item js-nav-sound">
+                    <span class="tk-nav__en">Growth</span>
+                    <span class="tk-nav__ja">成長</span>
                 </a>
 
                 <a href="{{ route('record.index') }}" class="tk-nav__item js-nav-sound">

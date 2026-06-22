@@ -197,24 +197,26 @@ export default function TaskKillResult({
                         <span>討伐日時</span>
                     </div>
 
-                    {formattedLogs.length === 0 && (
-                        <div className="tk-result-empty-log">
-                            討伐ログがありません。
-                        </div>
-                    )}
+                    <div className={formattedLogs.length > 10 ? 'tk-result-log-body is-scrollable' : 'tk-result-log-body'}>
+                        {formattedLogs.length === 0 && (
+                            <div className="tk-result-empty-log">
+                                討伐ログがありません。
+                            </div>
+                        )}
 
-                    {formattedLogs.map(log => (
-                        <div className="tk-result-log-row" key={log.id}>
-                            <span>
-                                <span className="tk-result-status-badge">討伐済</span>
-                            </span>
-                            <span className="tk-result-task-title">{log.title}</span>
-                            <span>
-                                <span className="tk-result-type-badge">{log.bossType}</span>
-                            </span>
-                            <span className="tk-result-date">{log.defeatedAt}</span>
-                        </div>
-                    ))}
+                        {formattedLogs.map(log => (
+                            <div className="tk-result-log-row" key={log.id}>
+                                <span>
+                                    <span className="tk-result-status-badge">討伐済</span>
+                                </span>
+                                <span className="tk-result-task-title">{log.title}</span>
+                                <span>
+                                    <span className="tk-result-type-badge">{log.bossType}</span>
+                                </span>
+                                <span className="tk-result-date">{log.defeatedAt}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="tk-result-actions">

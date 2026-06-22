@@ -744,6 +744,33 @@
     border-top: 0;
 }
 
+.tk-result-log-body {
+    overflow: visible;
+}
+
+.tk-result-log-body.is-scrollable {
+    max-height: 380px;
+    overflow-y: auto;
+    scrollbar-color: rgba(255, 255, 255, 0.78) rgba(0, 0, 0, 0.28);
+    scrollbar-width: thin;
+}
+
+.tk-result-log-body.is-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tk-result-log-body.is-scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.tk-result-log-body.is-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.78);
+}
+
+.tk-result-log-body .tk-result-log-row:first-child {
+    border-top: 1px dotted rgba(255, 255, 255, 0.34);
+}
+
 .tk-result-log-row--head {
     min-height: 34px;
     background: rgba(255, 255, 255, 0.08);

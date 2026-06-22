@@ -10,6 +10,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\DevToolController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ChapterController;
 
 // -------------------------------
 // TOP（ログイン必須にするなら auth を付ける）
@@ -64,6 +65,16 @@ Route::middleware(['auth'])->group(function () {
     // -------------------------------
     Route::get('/record', [RecordController::class, 'index'])->name('record.index');
     Route::get('/status', [StatusController::class, 'index'])->name('status.index');
+
+    // -------------------------------
+    // Growth / Chapter
+    // -------------------------------
+    Route::get('/journey', function () {
+        return redirect()->route('chapters.index');
+    });
+    Route::get('/growth', [ChapterController::class, 'index'])->name('chapters.index');
+    Route::post('/growth', [ChapterController::class, 'store'])->name('chapters.store');
+    Route::post('/growth/finish', [ChapterController::class, 'finish'])->name('chapters.finish');
 
     // -------------------------------
     // Achievements

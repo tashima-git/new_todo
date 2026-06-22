@@ -89,4 +89,16 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserSetting::class);
     }
+
+    public function chapters()
+    {
+        return $this->hasMany(Chapter::class);
+    }
+
+    public function activeChapter()
+    {
+        return $this->hasOne(Chapter::class)
+            ->whereNull('ended_at')
+            ->latestOfMany();
+    }
 }
